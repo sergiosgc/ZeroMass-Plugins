@@ -1,0 +1,20 @@
+#usage-summary h1 {
+ font-size: 20px;
+ border-bottom: 5px solid #0088CC;
+}
+#usage-summary h2 {
+ font-size: 20px;
+ border-bottom: 3px solid #0088CC;
+}
+#usage-summary h3 {
+ font-size: 17px;
+ border-bottom: 3px solid #0088CC;
+}
+#usage-summary h4 {
+ font-size: 17px;
+ border-bottom: 1px solid #0088CC;
+}
+#hooks-doc h3 {
+ font-size: 17px;
+ border-bottom: 1px solid #0088CC;
+}
