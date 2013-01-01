@@ -38,12 +38,15 @@ class PluginInstaller {
 
     public function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.pluginInit', array($this, 'init'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_nosql', array($this, 'readFromNoSQL'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.pluginManager.installed', array($this, 'doneSubTaskInstall'));
     }/*}}}*/
-    public function init() {
+    public function init() {/*{{{*/
+    }/*}}}*/
+    public function readFromNoSQL() {/*{{{*/
         $this->installationStack = \com\sergiosgc\Facility::get('nosql')->get('com.sergiosgc.pf.pluginInstaller.installationStack');
         if (is_null($this->installationStack)) $this->installationStack = array();
-    }
+    }/*}}}*/
     protected function registerKnownRepository($plugin, $url) {/*{{{*/
         if (!isset($this->knownRepos)) $this->knownRepos = \com\sergiosgc\Facility::get('nosql')->get('com.sergiosgc.pf.pluginInstaller.knownRepositories');
         if (is_null($this->knownRepos)) $this->knownRepos = array();

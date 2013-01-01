@@ -9,10 +9,13 @@ class PluginManager {
      */
     public function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.pluginInit', array($this, 'init'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_switchboard', array($this, 'addSwitchboardHandlers'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.plugin.phpdoc.getallSourceFiles', array($this, 'filterOutLibsFromDoc'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.after__construct', array($this, 'registerBackupAPIProviders'));
     }/*}}}*/
     public function init() {/*{{{*/
+    }/*}}}*/
+    public function addSwitchboardHandlers() {/*{{{*/
         $switchboard = \com\sergiosgc\Facility::get('switchboard');
 
         $switchboard->addHandler(array($this, 'install'), '/zeromass/plugins/install/');
