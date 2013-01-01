@@ -4,6 +4,7 @@ namespace com\sergiosgc;
 
 class Facility {
     protected static $facilities = array();
+    protected static $announcedFacilities = array();
     /**
      * Register to provide a facility
      *
@@ -43,16 +44,19 @@ class Facility {
             if (!is_object($candidates)) throw new FacilityDuplicateException(sprintf('Duplicate Facility registration for %s not resolved by com.sergiosgc.facility.collision hook', $tag));
         }
         self::$facilities[$tag] = $provider;
-        /*#
-         * Let plugins know a new facility is now available
-         *
-         * @param string Tag for which a facility was now registered
-         */
-        \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.available', $tag);
-        /*#
-         * Let plugins know a new facility is now available
-         */
-        \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.available_' . $tag);
+        if (!isset(self::$announcedFacilities[$tag])) {
+            self::$announcedFacilities[$tag] = true;
+            /*#
+             * Let plugins know a new facility is now available
+             *
+             * @param string Tag for which a facility was now registered
+             */
+            \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.available', $tag);
+            /*#
+             * Let plugins know a new facility is now available
+             */
+            \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.available_' . $tag);
+        }
     }/*}}}*/
     /**
      * Retrieve a facility
