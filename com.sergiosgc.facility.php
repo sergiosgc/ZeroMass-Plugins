@@ -42,6 +42,7 @@ class Facility {
                 $candidates = $candidates[0];
             }
             if (!is_object($candidates)) throw new FacilityDuplicateException(sprintf('Duplicate Facility registration for %s not resolved by com.sergiosgc.facility.collision hook', $tag));
+            $provider = $candidates;
         }
         self::$facilities[$tag] = $provider;
         if (!isset(self::$announcedFacilities[$tag])) {
