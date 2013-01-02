@@ -43,7 +43,9 @@ class DB {
     public function query($query) {/*{{{*/
         $args = func_get_args();
         $cursor = call_user_func_array(array($this, 'doQuery'), $args);
+        $result = $cursor->rowCount();
         $cursor->closeCursor();
+        return $result;
     }/*}}}*/
     public function fetchAll($query) {/*{{{*/
         $args = func_get_args();
