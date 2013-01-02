@@ -5,6 +5,8 @@ namespace com\sergiosgc;
 class DB {
     protected static $singleton = null;
     protected $config = null;
+    protected $connection = null;
+    protected $driver = null;
     public static function getInstance() {/*{{{*/
         if (is_null(self::$singleton)) self::$singleton = new self();
         return self::$singleton;
@@ -227,7 +229,7 @@ class DB {
                 $dsn = 'sqlite:' . $driverParams['path'];
             }
         }
-
+        $this->driver = $driver;
         $this->connection = new \PDO($dsn, $username, $password);
     }/*}}}*/
 }
