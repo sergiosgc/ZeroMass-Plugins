@@ -174,6 +174,23 @@ class DB {
                 'username' => array(),
                 'password' => array()
             ),
+            'pgsql' => array(
+                'dsnDriverName' => 'pgsql',
+                'host' => array(),
+                'port' => array('default' => '5432'),
+                'dbname' => array(),
+                'username' => array(),
+                'password' => array('default' => '')
+            ),
+            '4D' => array(
+                'dsnDriverName' => 'pgsql',
+                'host' => array(),
+                'port' => array('default' => '1919'),
+                'dbname' => array(),
+                'charset' => array('default' => 'UTF-8'),
+                'username' => array(),
+                'password' => array('default' => '')
+            ),
         );
 
         $config = \com\sergiosgc\Facility::get('config');
