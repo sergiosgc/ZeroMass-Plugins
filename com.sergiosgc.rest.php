@@ -164,6 +164,7 @@ class Rest {
          * The plugin is answering a REST read (GET) request. Allow the SQL WHERE clause to be filtered
          *
          * The SQL where clause is represented by an array with two elements:
+         *
          *  - A parameterized string to be included in the SQL statement as a WHERE clause, with ? as argument placeholders
          *  - An array of arguments to be passed on to DB::fetchAll
          *
@@ -205,6 +206,7 @@ class Rest {
          * The plugin is answering a REST update (POST or PATCH) request. Allow the SQL WHERE clause to be filtered
          *
          * The SQL where clause is represented by an array with two elements:
+         *
          *  - A parameterized string to be included in the SQL statement as a WHERE clause, with ? as argument placeholders
          *  - An array of arguments to be passed on to DB::fetchAll
          *
@@ -280,6 +282,7 @@ class Rest {
          * The plugin is answering a REST delete (DELETE) request. Allow the SQL WHERE clause to be filtered
          *
          * The SQL where clause is represented by an array with two elements:
+         *
          *  - A parameterized string to be included in the SQL statement as a WHERE clause, with ? as argument placeholders
          *  - An array of arguments to be passed on to DB::fetchAll
          *
