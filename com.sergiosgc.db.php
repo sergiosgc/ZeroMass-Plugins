@@ -78,8 +78,8 @@ class DB {
         array_shift($args);
         $this->connect($args);
         $preparedStatement = $this->connection->prepare($query);
-        if ($preparedStatement === false) throw new DBQueryException($this->connection);
-        if ($preparedStatement->execute($args) === false) throw new DBQueryException($preparedStatement);
+        if ($preparedStatement === false) throw new DBQueryException($this->connection, $query, $args);
+        if ($preparedStatement->execute($args) === false) throw new DBQueryException($preparedStatement, $query, $args);
 
         return $preparedStatement;
     }/*}}}*/
@@ -130,11 +130,25 @@ class DB {
 class DBException extends \Exception { }
 class DBQueryException extends DBException {/*{{{*/
     public $driverErrorCode;
-    public function __construct($connectionOrStatement) {
+    public function __construct($connectionOrStatement, $query, $args) {
         $error = $connectionOrStatement->errorInfo();
-        parent::__construct($error[2], $error[0]);
-        $this->driverErrorCode = $error[1];
+        parent::__construct($error[2], $error[1]);
+        ob_start();
+?>
+Error executing SQL query:
+<dl>
+<dt>Message</dt><dd><?php echo $error[2] ?></dd>
+<dt>ANSI SQL error code</dt><dd><?php echo $error[0] ?></dd>
+<dt>Driver error code</dt><dd><?php echo $error[1] ?></dd>
+<dt>Query</dt>
+<dd><?php echo htmlspecialchars($query); ?></dd>
+<dt>Parameters</dt>
+<dd><ul><?php foreach ($args as $arg) printf('<li>%s (%s)</li>', htmlspecialchars($arg), gettype($arg)); ?></ul></dd>
+</dl>
+<?php
+        $this->htmlMessage = ob_get_clean();
     }
+    public function getHtmlMessage() { return $this->htmlMessage; }
 }/*}}}*/
 class DBMissingConfigurationKeyException extends DBException { /*{{{*/
     public $key;
