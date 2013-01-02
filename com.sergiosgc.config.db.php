@@ -38,6 +38,12 @@ class Config {
             $this->recursionSemaphore = true;
             $result = \com\sergiosgc\Facility::get('db')->fetchValue('SELECT value FROM config WHERE ckey = ?', $key);
             $this->recursionSemaphore = false;
+
+            if (is_null($result)) {
+                if ($exceptionIfNotFound) throw new KeyNotFoundException(sprintf('Did not find configuration key %s', $key));
+                return $default;
+            }
+
             return $result;
         }
     }/*}}}*/
