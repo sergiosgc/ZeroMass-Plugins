@@ -57,6 +57,17 @@ class Facility {
              * Let plugins know a new facility is now available
              */
             \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.available_' . $tag);
+        } else {
+            /*#
+             * Let plugins know a facility has been updated
+             *
+             * @param string Tag for which a facility was now registered
+             */
+            \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.replaced', $tag);
+            /*#
+             * Let plugins know a facility has been updated
+             */
+            \ZeroMass::getInstance()->do_callback('com.sergiosgc.facility.replaced_' . $tag);
         }
     }/*}}}*/
     /**
