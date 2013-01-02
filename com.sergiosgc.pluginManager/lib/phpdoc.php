@@ -319,7 +319,7 @@ class PhpParser {
             // \ZeroMass::getInstance()->do_callback
             //                           ^^^^^^^^^^^
             if (token_name($this->current_hook['last_token'][0]) == 'T_OBJECT_OPERATOR') {
-                if (token_name($token[0]) == 'T_STRING' && $token[1] == 'do_callback') {
+                if (token_name($token[0]) == 'T_STRING' && ($token[1] == 'do_callback' || $token[1] == 'do_callback_array')) {
                     $this->current_hook['last_token'] = $token;
                 } else {
                     $this->current_hook = null;
