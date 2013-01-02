@@ -178,7 +178,7 @@ class DB {
 
         $config = \com\sergiosgc\Facility::get('config');
         $driver = $config->get('DB.driver');
-        if (!array_key_exists($driver, $driverDSN)) throw new DBException('Unknown database driver: %s', $driver);
+        if (!array_key_exists($driver, $driverDSN)) throw new DBException(sprintf('Unknown database driver: %s', $driver));
         $driverParams = array();
         foreach($driverDSN[$driver] as $key => $params) {
             if ($key == 'dsnDriverName') continue;
