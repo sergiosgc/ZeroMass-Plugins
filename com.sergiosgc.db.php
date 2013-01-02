@@ -86,6 +86,86 @@ class DB {
     public function connect() {/*{{{*/
         if (isset($this->connection) && !is_null($this->connection)) return;
         $driverDSN = array(
+            'cubrid' => array(
+                'dsnDriverName' => 'cubrid',
+                'host' => array(),
+                'port' => array('default' => '33000'),
+                'dbname' => array(),
+                'username' => array('default' => ''),
+                'password' => array('default' => '')
+            ),
+            'sybase' => array(
+                'dsnDriverName' => 'sybase',
+                'host' => array(),
+                'dbname' => array(),
+                'appname' => array('default' => 'PHP ZeroMass'),
+                'charset' => array('default' => 'UTF-8'),
+                'username' => array(),
+                'password' => array()
+            ),
+            'mssql' => array(
+                'dsnDriverName' => 'mssql',
+                'host' => array(),
+                'dbname' => array(),
+                'appname' => array('default' => 'PHP ZeroMass'),
+                'charset' => array('default' => 'UTF-8'),
+                'username' => array(),
+                'password' => array()
+            ),
+            'dblib' => array(
+                'dsnDriverName' => 'dblib',
+                'host' => array(),
+                'dbname' => array(),
+                'appname' => array('default' => 'PHP ZeroMass'),
+                'charset' => array('default' => 'UTF-8'),
+                'username' => array(),
+                'password' => array()
+            ),
+            'sqlsrv' => array(
+                'dsnDriverName' => 'sqlsrv',
+                'APP' => array('default' => 'PHP ZeroMass'),
+                'ConnectionPooling' => array('default' => '1'),
+                'Database' => array(),
+                'Encrypt' => array('default' => '0'),
+                'Server' => array(),
+                'TrustServerCertificate' => array('default' => '0'),
+                'username' => array(),
+                'password' => array()
+            ),
+            'firebird' => array(
+                'dsnDriverName' => 'firebird',
+                'dbname' => array(),
+                'charset' => array('default' => 'UTF-8'),
+                'role' => array(),
+                'username' => array(),
+                'password' => array()
+            ),
+            'ibm' => array(
+                'dsnDriverName' => 'ibm',
+                'host' => array(),
+                'port' => array('default' => '3700'),
+                'database' => array(),
+                'username' => array(),
+                'password' => array()
+            ),
+            'informix' => array(
+                'dsnDriverName' => 'informix',
+                'DSN' => array(),
+            ),
+            'oci' => array(
+                'dsnDriverName' => 'oci',
+                'dbname' => array(),
+                'charset' => array('default' => 'UTF-8'),
+            ),
+            'odbc' => array(
+                'dsnDriverName' => 'odbc',
+                'DSN' => array(),
+            ),
+            'sqlite' => array(
+                'dsnDriverName' => 'sqlite',
+                'memory' => array('default' => '0'),
+                'path' => array('default' => '')
+            ),
             'mysql' => array(
                 'dsnDriverName' => 'mysql',
                 'host' => array(),
@@ -121,6 +201,14 @@ class DB {
         foreach($driverParams as $key => $value) {
             $dsn .= $separator . $key . '=' . $value;
             $separator = ';';
+        }
+        if ($driver == 'sqlite') {
+            if ($driverParams['path'] == '' && $driverParams['memory'] == '0') throw new DBMissingConfigurationKeyException('path');
+            if ($driverParams['memory'] == '0') {
+                $dsn = 'sqlite::memory:';
+            } else {
+                $dsn = 'sqlite:' . $driverParams['path'];
+            }
         }
 
         $this->connection = new \PDO($dsn, $username, $password);
