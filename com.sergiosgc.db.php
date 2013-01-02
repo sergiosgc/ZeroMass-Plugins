@@ -29,7 +29,7 @@ class DB {
             $valueString = '';
             $separator = '';
             foreach(array_keys($valueArray) as $field) {
-                $fieldString .= sprintf("%s%s", $separator, $field);
+                $fieldString .= sprintf("%s%s", $separator, $this->quoteColumn($field));
                 $valueString .= $separator . '?';
                 $separator = ',';
             }
@@ -231,6 +231,12 @@ class DB {
         }
         $this->driver = $driver;
         $this->connection = new \PDO($dsn, $username, $password);
+    }/*}}}*/
+    public function quoteColumn($name) {/*{{{*/
+        $quote = '"';
+        $escape = '\\';
+        if ($this->driver == 'mysql') $quote = '`';
+        return $quote . strtr($name, array($escape => '', $quote => '')) . $quote;
     }/*}}}*/
 }
 
