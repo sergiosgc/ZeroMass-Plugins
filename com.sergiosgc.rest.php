@@ -17,7 +17,7 @@ class Rest {
     protected function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.pluginInit', array($this, 'init'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_config', array($this, 'config'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_replaced', array($this, 'config'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.replaced_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
     }/*}}}*/
     /**
