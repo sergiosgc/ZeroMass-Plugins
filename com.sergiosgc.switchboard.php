@@ -14,7 +14,7 @@ class Switchboard {
     public function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.pluginInit', array($this, 'init'), 1);
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleCurrentRequest'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'throw404Exception'), 10);
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'throw404Exception'), 50);
     }/*}}}*/
     public function init() {/*{{{*/
         Facility::register('switchboard', $this);
