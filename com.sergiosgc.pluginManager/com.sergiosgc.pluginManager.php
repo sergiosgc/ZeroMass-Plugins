@@ -25,6 +25,12 @@ class PluginManager {
         $switchboard->addHandler(array($this, 'pluginDetail'), '_/zeromass/plugin/[^/]+$_', \com\sergiosgc\Switchboard::TARGET_TYPE_URIREGEX);
         $switchboard->addHandler(array($this, 'setRepositoryURLs'), '/zeromass/plugins/install/setrepourl');
     }/*}}}*/
+    protected function listPluginSorter($a, $b) {
+        if ($a->getId() == $b->getId()) return 0;
+        if ($a->getId() < $b->getId()) return -1;
+        return 1;
+    }
+
     /**
      * Output the plugin list page
      *
@@ -41,12 +47,13 @@ class PluginManager {
          * @return array \com\sergiosgc\zeromass\Plugin instance array
          */
         $plugins = \ZeroMass::getInstance()->do_callback('com.sergiosgc.zeromass.pluginManager.listPlugins', $plugins);
+        usort($plugins, array($this, 'listPluginSorter'));
         $names = array();
         foreach ($plugins as $plugin) $names[] = $plugin->getName();
         $table = new \com\sergiosgc\ui\Table();
         foreach ($plugins as $plugin) $table->addRow(
             array(
-                'plugin' => sprintf('<a href="/zeromass/plugin/%s">%s</a>', $plugin->getId(), $plugin->getName())
+                'plugin' => sprintf('<span class="plugin-list-name">%s</span><br><a href="/zeromass/plugin/%s">%s</a>', $plugin->getId(), $plugin->getId(), $plugin->getName())
             )
         );
 

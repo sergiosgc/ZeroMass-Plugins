@@ -34,6 +34,10 @@ class PluginManagerPage {
   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
   <style type="text/css">
 @import url(http://fonts.googleapis.com/css?family=Allerta+Stencil);
+.plugin-list-name {
+ font-size: 80%%;
+ color: #666666;
+}
 .navbar {
  display: none;
 }
