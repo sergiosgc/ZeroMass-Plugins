@@ -358,6 +358,7 @@ class PhpParser {
         foreach($comment as $index => $line) {
             if (substr($line, 0, 1) == '@') $tagText[] = $index;
         }
+        $tagText = array_values(array_reverse($tagText));
         foreach (array_reverse($tagText) as $i => $lineIndex) {
             $tagText[$i] = $comment[$lineIndex]; 
             unset($comment[$lineIndex]);
