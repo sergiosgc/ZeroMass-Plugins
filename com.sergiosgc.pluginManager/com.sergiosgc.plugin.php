@@ -310,10 +310,10 @@ class Plugin {
 ?>
 <ul class="classList">
 <?php foreach ($phpDoc['hooks'] as $name => $properties) { ?>
-<li id="hook-<?php echo strtr($name, array('\\' => '-', '.' => '-')) ?>">
+<li id="hook-<?php echo strtr($name, array('\\' => '-', '.' => '-', '*' => 'star')) ?>">
  <a href="#" onclick="jQuery('#inner-' + this.parentNode.id).toggle(); return false;"><?php echo $name ?></a>
 <?php if ($properties['phpdoc']['summary'] ) print('<br>'); print( $properties['phpdoc']['summary'] ); ?>
- <div style="display: none" id="inner-hook-<?php echo strtr($name, array('\\' => '-', '.' => '-')) ?>">
+ <div style="display: none" id="inner-hook-<?php echo strtr($name, array('\\' => '-', '.' => '-', '*' => 'star')) ?>">
 <?php 
         if ($properties['phpdoc']['description']) {
             print( \Markdown(strtr($properties['phpdoc']['description'], array('*\\/' => '*/'))) );
