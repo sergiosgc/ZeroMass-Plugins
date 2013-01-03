@@ -326,7 +326,7 @@ class Plugin {
         if ($properties['phpdoc']['return']) {
             printf('<h3>Returns</h3> %s', $properties['phpdoc']['return']);
         }
-        printf("<h3>Capture code</h3><pre><code>\\Pwf::getInstance()->register_callback(\n    '%s',\n    array(\$this, '%s')\n);</code></pre>", $name, $name);
+        printf("<h3>Capture code</h3><pre><code>\\Pwf::getInstance()->register_callback(\n    '%s',\n    array(\$this, '%s')\n);</code></pre>", $name, preg_replace('_.*\.([a-zA-Z0-9]*).*_', '\1', $name));
         $argList = '';
 
 ?>
