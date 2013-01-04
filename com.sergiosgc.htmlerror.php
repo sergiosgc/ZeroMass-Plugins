@@ -55,7 +55,7 @@ EOS
     <strong>Error!</strong> An exception was thrown when handling the request:
     </div>
 <h1>Message</h1>
-<?php print is_callable(array($e, 'getHtmlMessage')) ? $e->getHtmlMessage() : $e->getMessage(); ?>
+<?php print is_callable(array($e, 'getHtmlMessage')) ? $e->getHtmlMessage() : ('<pre><tt>' . $e->getMessage() . '</tt></pre>'); ?>
 <h1>Stack trace</h1>
 <table class="table">
  <tr>
