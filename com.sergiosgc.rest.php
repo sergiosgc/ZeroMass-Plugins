@@ -5,7 +5,7 @@ namespace com\sergiosgc;
 class Rest {
     protected static $singleton = null;
     protected $baseURL = '/rest/';
-    protected $entitites = array();
+    protected $entities = array();
     /**
      * Singleton pattern instance getter
      * @return Config The singleton Config
