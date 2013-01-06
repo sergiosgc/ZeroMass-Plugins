@@ -240,6 +240,9 @@ class DB {
         if ($this->driver == 'mysql') $quote = '`';
         return $quote . strtr($name, array($escape => '', $quote => '')) . $quote;
     }/*}}}*/
+    public function getDriver() {/*{{{*/
+        return $this->driver;
+    }/*}}}*/
 }
 
 class DBException extends \Exception { }
