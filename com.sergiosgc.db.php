@@ -7,6 +7,7 @@ class DB {
     protected $config = null;
     protected $connection = null;
     protected $driver = null;
+    protected $username = null;
     public static function getInstance() {/*{{{*/
         if (is_null(self::$singleton)) self::$singleton = new self();
         return self::$singleton;
@@ -231,6 +232,7 @@ class DB {
                 $dsn = 'sqlite:' . $driverParams['path'];
             }
         }
+        $this->username = $username;
         $this->driver = $driver;
         $this->connection = new \PDO($dsn, $username, $password);
     }/*}}}*/
@@ -242,6 +244,9 @@ class DB {
     }/*}}}*/
     public function getDriver() {/*{{{*/
         return $this->driver;
+    }/*}}}*/
+    public function getUsername() {/*{{{*/
+        return $this->username;
     }/*}}}*/
 }
 
