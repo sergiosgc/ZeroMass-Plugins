@@ -1,6 +1,6 @@
 # ZeroMass Plugins
 
-**This code is under development, and not usable in its current form.**
+**This code is under development, and not usable in its current form.** The PluginManager works, but only with local repositories. Everything else is still far from ready. When ready, it should ammount to an Aspect-Oriented plugin stack for web application development.
 
 This is a plugin repository for use with [ZeroMass](https://github.com/sergiosgc/ZeroMass). If you don't know what is ZeroMass, you are better off reading the documentation [there](https://github.com/sergiosgc/ZeroMass). If you do know and have installed ZeroMass, your next step for using this repository is installing the _ZeroMass Plugin Manager_ plugin. It will allow you to easily install plugins from this repository (and others)
 
