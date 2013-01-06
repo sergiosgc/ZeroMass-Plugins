@@ -1,5 +1,7 @@
 # ZeroMass Plugins
 
+**This code is under development, and not usable in its current form.**
+
 This is a plugin repository for use with [ZeroMass](https://github.com/sergiosgc/ZeroMass). If you don't know what is ZeroMass, you are better off reading the documentation [there](https://github.com/sergiosgc/ZeroMass). If you do know and have installed ZeroMass, your next step for using this repository is installing the _ZeroMass Plugin Manager_ plugin. It will allow you to easily install plugins from this repository (and others)
 
 ## Installing the Plugin Manager
