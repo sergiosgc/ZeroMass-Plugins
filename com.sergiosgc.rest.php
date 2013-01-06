@@ -108,7 +108,7 @@ class Rest {
 
         return true;
     }/*}}}*/
-    protected function create($entity) {/*{{{*/
+    public function create($entity) {/*{{{*/
         parse_str(file_get_contents("php://input"), $_REQUEST);
         $result = new RestNoData();
         /*#
@@ -144,7 +144,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create', $result);
         return $result;
     }/*}}}*/
-    protected function read($entity) {/*{{{*/
+    public function read($entity) {/*{{{*/
         $result = new RestNoData();
         /*#
          * The plugin is about to answer a REST read (GET) request. Allow it to be short-circuited
@@ -186,7 +186,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read', $result);
         return $result;
     }/*}}}*/
-    protected function update($entity) {/*{{{*/
+    public function update($entity) {/*{{{*/
         $result = new RestNoData();
         /*#
          * The plugin is about to answer a REST update (POST or PATCH) request. Allow it to be short-circuited
@@ -262,7 +262,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update', $result);
         return $result;
     }/*}}}*/
-    protected function delete($entity) {/*{{{*/
+    public function delete($entity) {/*{{{*/
         $result = new RestNoData();
         /*#
          * The plugin is about to answer a REST delete (DELETE) request. Allow it to be short-circuited
