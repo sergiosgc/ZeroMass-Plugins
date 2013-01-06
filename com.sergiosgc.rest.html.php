@@ -154,6 +154,7 @@ class Html {
          * @return string The submit button class
          */
         $submitButtonClass = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.submitbuttonclass', $submitButtonClass, $entity);
+        \ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
 
 ?>
 <form class="<?php echo $formClass ?>" method="post" action="<?php echo $formAction; ?>">
@@ -202,6 +203,7 @@ class Html {
         $rows = \com\sergiosgc\Rest::getInstance()->read($entity);
         $table = new \com\sergiosgc\ui\Table();
         foreach($rows as $row) $table->addRow($row);
+        \ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
         $table->output();
     }/*}}}*/
     public function delete($entity) {/*{{{*/
@@ -357,6 +359,7 @@ class Html {
         if (count($data) == 0) throw new Exception('No data read from entity when creating update form');
         if (count($data) > 1) throw new Exception('More than one row read from entity when creating update form');
         $data = $data[0];
+        \ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
 
 ?>
 <form class="<?php echo $formClass ?>" method="post" action="<?php echo $formAction; ?>">
