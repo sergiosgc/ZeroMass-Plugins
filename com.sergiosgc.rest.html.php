@@ -53,6 +53,7 @@ class Html {
         $requestedEntity = substr($_SERVER['REQUEST_URI'], strlen($this->baseURL));
         $requestedEntity = preg_replace('_([^/]*).*_', '\1', $requestedEntity);
         if (!is_string($requestedEntity) || 0 == strlen($requestedEntity)) return $handled;
+        if (!isset($this->entities[$requestedEntity])) return $handled;
 
         $action = substr($_SERVER['REQUEST_URI'], strlen($this->baseURL) + strlen($requestedEntity) + 1);
         if ($action) $action = preg_replace('_([^/]*).*_', '\1', $action);
