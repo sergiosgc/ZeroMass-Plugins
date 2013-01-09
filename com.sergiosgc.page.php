@@ -67,7 +67,7 @@ class Page {
                     print $this->primaryOutput;
                     continue;
                 }
-                \ZeroMass::do_callback('com.sergiosgc.page.component', $part['name']);
+                @\ZeroMass::do_callback('com.sergiosgc.page.component', $part['name']);
             }
         }
     }/*}}}*/
