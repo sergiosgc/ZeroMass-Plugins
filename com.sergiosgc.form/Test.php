@@ -36,6 +36,9 @@ class Test
         case '/form/test/9/':
             $this->textInput();
             return true;
+        case '/form/test/10/':
+            $this->tableSerializer();
+            return true;
         default:
             return false;
         }
@@ -180,6 +183,53 @@ class Test
         $form->addMember(new Input_Text('test'));
         $serializer = new Serializer_Test();
         var_dump($serializer->serialize($form));
+    }/*}}}*/
+    public function tableSerializer() {/*{{{*/
+        $form = new Form('/someaction/', 'Form with text input', 'This form has no interesting inputs so it requires no action from you');
+        $form->addMember(new Input_Text('text'));
+        $form->addMember($choice = new Input_MultipleChoice('checkbox-open-field'));
+        $choice->addChoice(0, 'foo');
+        $choice->addChoice(1, 'bar');
+        $choice->setValue(array(1));
+        $choice->setLabel('Foo, bar, both, none or other?');
+        $form->addMember($choice = new Input_MultipleChoice('checkbox-field'));
+        $choice->addChoice(0, 'foo');
+        $choice->addChoice(1, 'bar');
+        $choice->setValue(array(1));
+        $choice->setLabel('Foo, bar, both or none?');
+        $choice->addRestriction(new Restriction_ClosedChoice());
+        $form->addMember($choice = new Input_MultipleChoice('radiobutton-field'));
+        $choice->addChoice(0, 'foo');
+        $choice->addChoice(1, 'bar');
+        $choice->setLabel('Foo or bar?');
+        $choice->addRestriction(new Restriction_ClosedChoice());
+        $choice->addRestriction(new Restriction_ExclusiveChoice());
+        $form->addMember($choice = new Input_MultipleChoice('dropdown-field'));
+        $choice->addChoice(0, 'foo');
+        $choice->addChoice(1, 'bar');
+        $choice->addChoice(2, 'baz');
+        $choice->addChoice(3, 'bat');
+        $choice->setLabel('Foo, bar, baz or bat?');
+        $choice->addRestriction(new Restriction_ClosedChoice());
+        $choice->addRestriction(new Restriction_ExclusiveChoice());
+        $form->addMember($choice = new Input_MultipleChoice('dropdown-field-open'));
+        $choice->addChoice(0, 'foo');
+        $choice->addChoice(1, 'bar');
+        $choice->addChoice(2, 'baz');
+        $choice->addChoice(3, 'bat');
+        $choice->setLabel('Foo, bar, baz, bat or other?');
+        $choice->addRestriction(new Restriction_ExclusiveChoice());
+        $form->addMember($choice = new Input_MultipleChoice('dropdown-field-open-multiple'));
+        $choice->addChoice(0, 'foo');
+        $choice->addChoice(1, 'bar');
+        $choice->addChoice(2, 'baz');
+        $choice->addChoice(3, 'bat');
+        $choice->setValue(array(1,3));
+        $choice->setLabel('Foo, bar, baz, bat and other?');
+        $choice->addRestriction(new Restriction_ExclusiveChoice());
+        $form->setValue('text', '"quote text"');
+        $serializer = new Serializer_Table();
+        print($serializer->serialize($form));
     }/*}}}*/
 }
 ?>
