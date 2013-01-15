@@ -13,7 +13,7 @@ class Switchboard {
 
     public function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.pluginInit', array($this, 'init'), 1);
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleCurrentRequest'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'answerPage'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'throw404Exception'), 50);
     }/*}}}*/
     public function init() {/*{{{*/
@@ -41,7 +41,11 @@ class Switchboard {
 
         $this->notFoundHandler = $callable;
     }/*}}}*/
-    public function handleCurrentRequest($exceptionIfNotFound = false) {/*{{{*/
+    public function answerPage($handled) {/*{{{*/
+        if ($handled) return $handled;
+        return $this->handleCurrentRequest();
+    }/*}}}*/
+    protected function handleCurrentRequest($exceptionIfNotFound = false) {/*{{{*/
         foreach ($this->handlers as $handler) {
             if ($handler['target']->matches()) {
                 if (call_user_func($handler['callable'])) return true;
