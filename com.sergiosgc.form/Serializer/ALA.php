@@ -1,5 +1,6 @@
 <?php
 namespace com\sergiosgc\form;
+
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 /** 
  * Serializer_ALA is a serializer to xhtml that produces code according to ALA's accessible forms article
