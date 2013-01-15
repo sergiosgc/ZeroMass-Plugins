@@ -8,12 +8,12 @@ namespace com\sergiosgc\form;
 class Serializer_Table
 {
     private $inputToSerializerMap = array(
-        'Input_MultipleChoice' => 'Serializer_Table_MultipleChoice',
-        'Input_Date' => 'Serializer_Table_Input',
-        'Input_Hidden' => 'Serializer_Table_Hidden',
-        'Input_Numeric' => 'Serializer_Table_Input',
-        'Input_Text' => 'Serializer_Table_Text',
-        'MemberSet' => 'Serializer_Table_FieldSet'
+        '\com\sergiosgc\form\Input_MultipleChoice' => '\com\sergiosgc\form\Serializer_Table_MultipleChoice',
+        '\com\sergiosgc\form\Input_Date' => '\com\sergiosgc\form\Serializer_Table_Input',
+        '\com\sergiosgc\form\Input_Hidden' => '\com\sergiosgc\form\Serializer_Table_Hidden',
+        '\com\sergiosgc\form\Input_Numeric' => '\com\sergiosgc\form\Serializer_Table_Input',
+        '\com\sergiosgc\form\Input_Text' => '\com\sergiosgc\form\Serializer_Table_Text',
+        '\com\sergiosgc\form\MemberSet' => '\com\sergiosgc\form\Serializer_Table_FieldSet'
         );
     public static function oddEven()
     {
