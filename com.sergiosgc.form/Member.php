@@ -29,7 +29,7 @@ abstract class Member
     }
     /* }}} */
     /* label field {{{ */
-    protected $label;
+    protected $label = null;
     public function setLabel($label)
     {
         $this->label = $label;
