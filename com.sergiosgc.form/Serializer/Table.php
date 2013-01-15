@@ -13,6 +13,8 @@ class Serializer_Table
         '\com\sergiosgc\form\Input_Hidden' => '\com\sergiosgc\form\Serializer_Table_Hidden',
         '\com\sergiosgc\form\Input_Numeric' => '\com\sergiosgc\form\Serializer_Table_Input',
         '\com\sergiosgc\form\Input_Text' => '\com\sergiosgc\form\Serializer_Table_Text',
+        '\com\sergiosgc\form\Input_Password' => '\com\sergiosgc\form\Serializer_Table_Password',
+        '\com\sergiosgc\form\Input_Button' => '\com\sergiosgc\form\Serializer_Table_Button',
         '\com\sergiosgc\form\MemberSet' => '\com\sergiosgc\form\Serializer_Table_FieldSet'
         );
     public static function oddEven()

@@ -18,18 +18,33 @@ class Serializer_ALA
         '\com\sergiosgc\form\Input_Hidden' => '\com\sergiosgc\form\Serializer_ALA_Hidden',
         '\com\sergiosgc\form\Input_Numeric' => '\com\sergiosgc\form\Serializer_ALA_Input',
         '\com\sergiosgc\form\Input_Text' => '\com\sergiosgc\form\Serializer_ALA_Input',
+        '\com\sergiosgc\form\Input_Password' => '\com\sergiosgc\form\Serializer_ALA_Password',
+        '\com\sergiosgc\form\Input_Button' => '\com\sergiosgc\form\Serializer_ALA_Button',
         '\com\sergiosgc\form\MemberSet' => '\com\sergiosgc\form\Serializer_ALA_FieldSet'
         );
 
     public function serialize(Form $form)
     {
-        $result = sprintf(<<<EOS
+        $hasButton = false;
+        foreach($form->getIterator() as $input) {
+            if ($input instanceof \com\sergiosgc\form\Input_Button) $hasButton = true;
+        }
+        if ($hasButton) {
+            $result = sprintf(<<<EOS
+<form method="post" action="%s">
+%s
+</form>
+EOS
+            , $form->getAction('submit'), Form::indent($this->serializeMember($form->getTopMemberSet())));
+        } else {
+            $result = sprintf(<<<EOS
 <form method="post" action="%s">
 %s
 <input type="submit" />
 </form>
 EOS
-        , $form->getAction('submit'), Form::indent($this->serializeMember($form->getTopMemberSet())));
+            , $form->getAction('submit'), Form::indent($this->serializeMember($form->getTopMemberSet())));
+        }
         return $result;
     }
     public function serializeMember(Member $member)
