@@ -7,7 +7,7 @@ class Test
          @\ZeroMass::register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleCurrentRequest'));
     }/*}}}*/
     public function handleCurrentRequest($handled) {/*{{{*/
-        if ($handled) return;
+        if ($handled) return $handled;
         switch ($_SERVER['REQUEST_URI']) {
         case '/form/test/1/':
             $this->alaSerializer();
