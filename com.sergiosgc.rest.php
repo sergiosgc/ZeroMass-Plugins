@@ -118,9 +118,10 @@ class Rest {
          * This hook may, of course also be used to change the superglobals, affecting the request
          *
          * @param mixed The result. 
+         * @param string Entity being processed
          * @return mixed The result. An instance of RestNoData causes execution to continue
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.pre', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.pre', $result, $entity);
         if (get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
         $table = $this->entities[$entity];
@@ -129,9 +130,10 @@ class Rest {
          * The plugin is answering a REST create (PUT) request. Allow the list of fields to insert to be filtered
          *
          * @param array Associative array of fields to be inserted
+         * @param string Entity being processed
          * @param return Associative array of fields to be inserted
          */
-        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.fields', $_REQUEST );
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.fields', $_REQUEST, $entity );
         $db->insert($table, $fields);
         $result = true;
 
@@ -139,9 +141,10 @@ class Rest {
          * The plugin has the result for a REST create (PUT) request. Allow it to be filtered
          *
          * @param array The result
+         * @param string Entity being processed
          * @return array The result
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create', $result, $entity);
         return $result;
     }/*}}}*/
     public function read($entity) {/*{{{*/
@@ -169,21 +172,23 @@ class Rest {
          *  - An array of arguments to be passed on to DB::fetchAll
          *
          * @param array The where clause
+         * @param string Entity being processed
          * @return array The where clause
          */
-        $where = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.where', $this->buildWhereClause());
+        $where = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.where', $this->buildWhereClause($fields), $entity);
         $args = $where[1];
         $where = $where[0];
         
-        array_unshift($args, sprintf('SELECT * FROM %s%s', $table, $where));
+        array_unshift($args, sprintf('SELECT * FROM %s%s', $db->quoteColumn($table), $where));
         $result = call_user_func_array(array($db, 'fetchAll'), $args);
         /*#
          * The plugin has the result for a REST read (GET) request. Allow it to be filtered
          *
          * @param array The result
+         * @param string Entity being processed
          * @return array The result
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read', $result, $entity);
         return $result;
     }/*}}}*/
     public function update($entity) {/*{{{*/
@@ -211,9 +216,10 @@ class Rest {
          *  - An array of arguments to be passed on to DB::fetchAll
          *
          * @param array The where clause
+         * @param string Entity being processed
          * @return array The where clause
          */
-        $where = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.where', $this->buildWhereClause());
+        $where = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.where', $this->buildWhereClause($fields), $entity);
         $args = $where[1];
         $where = $where[0];
 
@@ -223,9 +229,10 @@ class Rest {
          * The plugin is answering a REST update (POST or PATCH) request. Allow the list of fields to update to be filtered
          *
          * @param array Associative array of fields to be updated
+         * @param string Entity being processed
          * @param return Associative array of fields to be updated
          */
-        $toUpdateArray = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.fields', $toUpdateArray );
+        $toUpdateArray = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.fields', $toUpdateArray, $entity );
         $setClause = '';
         $separator = ' SET ';
         foreach ($toUpdateArray as $key => $value) {
@@ -242,24 +249,26 @@ class Rest {
          *  - An array of arguments to be passed on to DB::fetchAll
          *
          * @param array The set clause
+         * @param string Entity being processed
          * @return array The set clause
          */
-        $setClause = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.set', $setClause);
+        $setClause = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.set', $setClause, $entity);
         $toUpdateArray = $setClause[1];
         $setClause = $setClause[0];
 
         $args = array_merge($toUpdateArray, $args);
 
         
-        array_unshift($args, sprintf('UPDATE %s%s%s', $table, $setClause, $where));
+        array_unshift($args, sprintf('UPDATE %s%s%s', $db->quoteColumn($table), $setClause, $where));
         $result = call_user_func_array(array($db, 'query'), $args);
         /*#
          * The plugin has the result for a REST update (POST or PATCH) request. Allow it to be filtered
          *
          * @param array The result
+         * @param string Entity being processed
          * @return array The result
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update', $result, $entity);
         return $result;
     }/*}}}*/
     public function delete($entity) {/*{{{*/
