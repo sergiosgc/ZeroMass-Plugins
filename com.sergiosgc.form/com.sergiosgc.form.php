@@ -184,6 +184,12 @@ class Form implements \IteratorAggregate
             if (!is_null($input)) $input->setError($errors);
         }
     }
+    public function appendInputErrors($err) {
+        foreach ($err as $field => $errors) {
+            $input = $this->getInput($field);
+            if (!is_null($input)) $input->appendError($errors);
+        }
+    }
     /*}}}*/
     /* toString {{{ */
     public function __toString()
