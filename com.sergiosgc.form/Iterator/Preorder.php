@@ -1,5 +1,6 @@
 <?php
 namespace com\sergiosgc\form;
+
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 /** 
  * A member set. Aggregates inputs and other member sets in a labeled group.

@@ -6,5 +6,11 @@ namespace com\sergiosgc\form;
  */
 class Restriction_Integer extends Restriction
 {
+    public function validate() {/*{{{*/
+        if ( ( (string) ( (int) $this->target->getValue() ) ) != $this->target->getValue() ) {
+            return 'Value must be an integer';
+        }
+        return true;
+    }/*}}}*/
 }
 ?>

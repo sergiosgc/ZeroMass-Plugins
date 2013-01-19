@@ -28,6 +28,7 @@ class Form implements \IteratorAggregate
         if (strlen($class) < strlen(__NAMESPACE__) || __NAMESPACE__ != substr($class, 0, strlen(__NAMESPACE__))) return;
         $class = substr($class, strlen(__NAMESPACE__) + 1);
         $path = dirname(__FILE__) . '/' . strtr($class, array('_' => '/')) . '.php';
+
         require_once($path);
     }/*}}}*/
     public static function registerAutoloader() {/*{{{*/
@@ -128,6 +129,13 @@ class Form implements \IteratorAggregate
     {
         $this->topMemberSet->removeMember($index);
     }
+    public function getInput($name) {
+        $it = $this->getIterator();
+        foreach ($it as $candidate) {
+            if (is_callable(array($candidate, 'getName')) && $candidate->getName() == $name) return $candidate;
+        }
+        return null;
+    }
     /* }}} */
     /* restrictions field {{{ */
     protected $restrictions = array();
@@ -162,6 +170,21 @@ class Form implements \IteratorAggregate
         $this->restrictions = array_values($this->restrictions);
     }
     /* }}} */
+    // errors field/*{{{*/
+    protected $errors = array();
+    public function setErrors($err) {
+        $this->errors = $err;
+    }
+    public function getErrors() {
+        return $this->errors;
+    }
+    public function setInputErrors($err) {
+        foreach ($err as $field => $errors) {
+            $input = $this->getInput($field);
+            if (!is_null($input)) $input->setError($errors);
+        }
+    }
+    /*}}}*/
     /* toString {{{ */
     public function __toString()
     {   
@@ -211,6 +234,31 @@ class Form implements \IteratorAggregate
         $this->topMemberSet->setValue($name, $value);
     }
     /* }}} */
+    public function validate() {/*{{{*/
+        $it = new Iterator_RestrictionIterator($this);
+        $passed = true;
+        $result = array(
+            'global' => array(),
+            'fields' => array());
+        foreach ($it as $restriction) {
+            $validation = $restriction->validate();
+            if ($validation !== true) {
+                $passed = false;
+                if ($restriction->getTarget() == $this) {
+                    $result['global'][] = $validation;
+                } else {
+                    if (!isset($result['fields'][$restriction->getTarget()->getName()])) {
+                        $result['fields'][$restriction->getTarget()->getName()] = array();
+                    }
+                    $result['fields'][$restriction->getTarget()->getName()][] = $validation;
+                }
+            }
+        }
+        if ($passed) return true;
+        $this->setErrors($result['global']);
+        $this->setInputErrors($result['fields']);
+        return $result;
+    }/*}}}*/
 }
 /*# 
  * Object-oriented HTML form representation with pluggable serializers and validations

@@ -27,5 +27,16 @@ abstract class Restriction
         return get_class($this);
     }
     /* }}} */
+    /**
+     * Validate this restriction
+     *
+     * Returns either true, if the restriction passes, or a string with an error message
+     * if the restriction fails
+     *
+     * @return string|bool Validation result
+     */
+    public function validate() {/*{{{*/
+        return true;
+    }/*}}}*/
 }
 ?>

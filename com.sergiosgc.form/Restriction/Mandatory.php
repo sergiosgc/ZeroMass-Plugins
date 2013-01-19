@@ -7,5 +7,9 @@ namespace com\sergiosgc\form;
  */
 class Restriction_Mandatory extends Restriction
 {
+    public function validate() {/*{{{*/
+        if (strlen($this->getTarget()->getValue()) == 0) return 'Field is mandatory';
+        return true;
+    }/*}}}*/
 }
 ?>

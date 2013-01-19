@@ -20,5 +20,9 @@ class Restriction_MaxLength extends Restriction
     {
         $this->setLength($maxLength);
     }
+    public function validate() {/*{{{*/
+        if (strlen($this->target->getValue()) > $this->length) return sprintf('Value must be less than %d characters long', $this->length+1);
+        return true;
+    }/*}}}*/
 }
 ?>

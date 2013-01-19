@@ -7,5 +7,9 @@ namespace com\sergiosgc\form;
  */
 class Restriction_SingleLine extends Restriction
 {
+    public function validate() {/*{{{*/
+        if (strpos($this->target->getValue(), "\n") !== FALSE) return sprintf('Text must not contain line breaks');
+        return true;
+    }/*}}}*/
 }
 ?>
