@@ -34,7 +34,7 @@ class DB {
                 $valueString .= $separator . '?';
                 $separator = ',';
             }
-            $query = sprintf('INSERT INTO %s(%s) VALUES(%s);', $table, $fieldString, $valueString);
+            $query = sprintf('INSERT INTO %s(%s) VALUES(%s);', $this->quoteColumn($table), $fieldString, $valueString);
             $args = array_values($valueArray);
             array_unshift($args, $query);
         }
