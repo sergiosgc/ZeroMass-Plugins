@@ -9,7 +9,7 @@ namespace com\sergiosgc\form;
 abstract class Input extends Member
 {
     /* help field {{{ */
-    public $help;
+    public $help = null;
     public function getHelp()
     {
         return $this->help;
@@ -20,7 +20,7 @@ abstract class Input extends Member
     }
     /* }}} */
     /* error field {{{ */
-    public $error;
+    public $error = null;
     public function getError()
     {
         return $this->error;
