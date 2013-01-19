@@ -29,6 +29,12 @@ abstract class Input extends Member
     {
         $this->error = $val;
     }
+    public function appendError($val) {
+        if (is_null($this->error)) $this->error = array();
+        if (!is_array($this->error)) $this->error = array($this->error);
+        if (!is_array($val)) $val = array($val);
+        $this->error = array_merge($this->error, $val);
+    }
     /* }}} */
     /* value field {{{ */
     public $value;
