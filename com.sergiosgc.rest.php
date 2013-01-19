@@ -156,13 +156,22 @@ class Rest {
          * This hook may, of course also be used to change the superglobals, affecting the request
          *
          * @param mixed The result. 
+         * @param string Entity being processed
          * @return mixed The result. An instance of RestNoData causes execution to continue
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.pre', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.pre', $result, $entity);
         if (!is_object($result) || get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
         $table = $this->entities[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        /*#
+         * The plugin is answering a REST read (GET) request. Allow the fields for creating the WHERE clause to be filtered
+         *
+         * @param array The fields
+         * @param string Entity being processed
+         * @return array fields
+         */
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.where.fields', $_GET, $entity);
         /*#
          * The plugin is answering a REST read (GET) request. Allow the SQL WHERE clause to be filtered
          *
@@ -200,13 +209,22 @@ class Rest {
          * This hook may, of course also be used to change the superglobals, affecting the request
          *
          * @param mixed The result. 
+         * @param string Entity being processed
          * @return mixed The result. An instance of RestNoData causes execution to continue
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.pre', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.pre', $result, $entity);
         if (get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
         $table = $this->entities[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        /*#
+         * The plugin is answering a REST update (POST or PATCH) request. Allow the fields for creating the WHERE clause to be filtered
+         *
+         * @param array The fields
+         * @param string Entity being processed
+         * @return array fields
+         */
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.where.fields', $_GET, $entity);
         /*#
          * The plugin is answering a REST update (POST or PATCH) request. Allow the SQL WHERE clause to be filtered
          *
@@ -280,13 +298,22 @@ class Rest {
          * This hook may, of course also be used to change the superglobals, affecting the request
          *
          * @param mixed The result. 
+         * @param string Entity being processed
          * @return mixed The result. An instance of RestNoData causes execution to continue
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.pre', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.pre', $result, $entity);
         if (get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
         $table = $this->entities[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        /*#
+         * The plugin is answering a REST delete (DELETE) request. Allow the fields for creating the WHERE clause to be filtered
+         *
+         * @param array The fields
+         * @param string Entity being processed
+         * @return array fields
+         */
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.where.fields', $_GET, $entity);
         /*#
          * The plugin is answering a REST delete (DELETE) request. Allow the SQL WHERE clause to be filtered
          *
@@ -296,29 +323,31 @@ class Rest {
          *  - An array of arguments to be passed on to DB::fetchAll
          *
          * @param array The where clause
+         * @param string Entity being processed
          * @return array The where clause
          */
-        $where = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.where', $this->buildWhereClause());
+        $where = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.where', $this->buildWhereClause($fields), $entity);
         $args = $where[1];
         $where = $where[0];
         
-        array_unshift($args, sprintf('DELETE FROM %s%s', $table, $where));
+        array_unshift($args, sprintf('DELETE FROM %s%s', $db->quoteColumn($table), $where));
         $result = call_user_func_array(array($db, 'query'), $args);
         /*#
          * The plugin has the result for a REST delete (DELETE) request. Allow it to be filtered
          *
          * @param array The result
+         * @param string Entity being processed
          * @return array The result
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete', $result, $entity);
         return $result;
     }/*}}}*/
-    protected function buildWhereClause() {/*{{{*/
+    protected function buildWhereClause($fields) {/*{{{*/
         $db = \com\sergiosgc\Facility::get('db');
         $where = '';
         $args = array();
         $separator = ' WHERE ';
-        foreach ($_GET as $key => $value) {
+        foreach ($fields as $key => $value) {
             $where .= $separator . $db->quoteColumn($key) . ' = ?';
             $separator = ' AND ';
             $args[] = $value;
