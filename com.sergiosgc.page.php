@@ -40,6 +40,7 @@ class Page {
     }/*}}}*/
     public function contentTypeHandler($mime) {/*{{{*/
         if ($mime == 'text/html') $this->primaryOutputIsStarting();
+        return $mime;
     }/*}}}*/
     public function primaryOutputIsStarting() {/*{{{*/
         if ($this->primaryOutputHasStarted) return;
