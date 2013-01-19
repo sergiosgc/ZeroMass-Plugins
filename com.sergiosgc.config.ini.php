@@ -22,6 +22,17 @@ class Config {
     public function init() {/*{{{*/
         \com\sergiosgc\Facility::register('config', $this);
     }/*}}}*/
+    protected function _set(&$config, $key, $value) {/*{{{*/
+        $dotPos = strpos($key, '.');
+        if ($dotPos === false) {
+            $config[$key] = $value;
+            return;
+        }
+        $left = substr($key, 0, $dotPos);
+        $right = substr($key, $dotPos + 1);
+        if (!isset($config[$left])) $config[$left] = array();
+        $this->_set($config[$left], $right, $value);
+    }/*}}}*/
     protected function readConfig() {/*{{{*/
         if (!is_null($this->config)) return;
         $configFilePath = \ZeroMass::getInstance()->privateDir . '/config.ini';
@@ -30,6 +41,10 @@ class Config {
         if (!is_readable($configFilePath)) throw new ConfigException(sprintf('Configuration file is not readable: %s', $configFilePath));
         $config = parse_ini_file($configFilePath, true, INI_SCANNER_NORMAL);
         if ($config === false) throw new ConfigException(sprintf('Error parsing config file: %s', $configFilePath));
+        $deepConfig = array();
+        foreach ($config as $key => $value) $this->_set($deepConfig, $key, $value);
+        $config = $deepConfig;
+
         $config = \ZeroMass::getInstance()->do_callback('com.sergiosgc.config.ini.config', $config);
         $this->config = $config;
     }/*}}}*/
