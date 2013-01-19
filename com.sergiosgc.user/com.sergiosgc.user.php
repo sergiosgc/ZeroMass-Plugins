@@ -9,7 +9,7 @@ class User {
         'login' => '/login/', 
         'loginaction' => '/actions/login/', 
         'afterlogin' => '/',
-        'logoutaction' => '/actions/logout/',
+        'logoutaction' => '/logout/',
         'afterlogout' => '/',
         'new' => '/signup/',
         'afternew' => '/'
@@ -89,6 +89,9 @@ class User {
                     return true;
                 case $this->url['login']:
                     $this->login();
+                    return true;
+                case $this->url['logoutaction']:
+                    $this->logout();
                     return true;
                 default: return $handled;
             }
@@ -278,7 +281,17 @@ EOS
          */
         $validation = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.login.validate', $validation, $form);
         if ($validation === true) {
-            var_dump('All A-OK');
+            \com\sergiosgc\Facility::get('session')->set('user', $_REQUEST['username']);
+            $redirect = $this->url['afterlogin'];
+            /*#
+             * User login is ending and will HTTP redirect. Allow the location to be mangled
+             *
+             * @param string URL to redirect to
+             * @param string Username
+             * @return string URL to redirect to
+             */
+            $redirect = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.login.redirect', $redirect, $_REQUEST['username']);
+            header('Location: ' . $redirect);
             exit;
         } else {
             $this->loginForm($form);
@@ -327,6 +340,23 @@ EOS
             return $validation;
         }
         return $validation;
+    }/*}}}*/
+    public function logout() {/*{{{*/
+        \com\sergiosgc\Facility::get('session')->delete('user');
+        $redirect = $this->url['afterlogout'];
+        /*#
+         * User logout is ending and will HTTP redirect. Allow the location to be mangled
+         *
+         * @param string URL to redirect to
+         * @param string Username
+         * @return string URL to redirect to
+         */
+        $redirect = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.logout.redirect', $redirect);
+        header('Location: ' . $redirect);
+        exit;
+    }/*}}}*/
+    public function getLoggedIn() {/*{{{*/
+        return \com\sergiosgc\Facility::get('session')->get('user', true);
     }/*}}}*/
 }
 
