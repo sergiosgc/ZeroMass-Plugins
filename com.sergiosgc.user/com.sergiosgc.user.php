@@ -27,6 +27,7 @@ class User {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.replaced_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
+        \com\sergiosgc\form\Form::registerAutoloader();
     }/*}}}*/
     /**
      * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
@@ -58,7 +59,7 @@ class User {
     }/*}}}*/
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
-        switch ($_SERVER['REQUEST_URI']) {
+        switch (preg_replace('_\?.*$_', '', $_SERVER['REQUEST_URI'])) {
         case $this->url['new']:
             $this->signupForm();
             return true;
@@ -75,20 +76,54 @@ class User {
         default: return $handled;
         }
     }/*}}}*/
-    public function signupForm() {/*{{{*/
+    public function generateSignupForm() {/*{{{*/
         $form = new form\Form($this->url['newaction'], 'Login', '');
         $form->addMember($input = new form\Input_Text('username'));
         $input->setLabel('Username');
+        $input->addRestriction(new form\Restriction_Mandatory());
+        if (isset($_REQUEST['username'])) $input->setValue($_REQUEST['username']);
         $form->addMember($input = new form\Input_Password('password'));
+        if (isset($_REQUEST['password'])) $input->setValue($_REQUEST['password']);
         $input->setLabel('Password');
+        $input->addRestriction(new form\Restriction_Mandatory());
         $form->addMember($input = new form\Input_Button('create'));
         $input->setLabel('Create user');
 
-        @\ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
+        /*#
+         * The plugin has just created a form for user signup. Allow it to be mangled
+         *
+         * @param \com\sergiosgc\form\Form The signup form
+         * @return \com\sergiosgc\form\Form The signup form
+         */
+        $form = @\ZeroMass::do_callback('com.sergiosgc.user.signup.form', $form);
+        return $form;
+    }/*}}}*/
+    public function signupForm() {/*{{{*/
+        $form = $this->generateSignupForm();
         $serializer = new \com\sergiosgc\form\Serializer_TwitterBootstrap();
         $serializer->setLayout('horizontal');
-        echo $serializer->serialize($form);
+
+        /*#
+         * The plugin is about to serialize the signup form. Allow the serializer to be mangled
+         *
+         * @param \com\sergiosgc\form\Form_Serializer The form serializer
+         * @return \com\sergiosgc\form\Form_Serializer The form serializer
+         */
+        $serializer = @\ZeroMass::do_callback('com.sergiosgc.user.signup.form_serializer', $serializer);
+        @\ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
+        /*#
+         * The plugin is about to output the signup form. Allow the html to be mangled
+         *
+         * @param string The form
+         * @return string The form
+         */
+        echo @\ZeroMass::do_callback('com.sergiosgc.user.signup.form_html', $serializer->serialize($form));
     }/*}}}*/
+    public function signup() {
+        $form = $this->generateSignupForm();
+        $validation = $form->validate();
+        var_dump($form);
+    }
 }
 
 User::getInstance();
