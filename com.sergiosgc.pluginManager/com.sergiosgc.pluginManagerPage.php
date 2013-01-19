@@ -38,7 +38,7 @@ class PluginManagerPage {
  font-size: 80%%;
  color: #666666;
 }
-.navbar {
+.nnavbar {
  display: none;
 }
 .sidebar-nav .icon-chevron-right {
@@ -79,7 +79,7 @@ class PluginManagerPage {
 ZeroMass Plugin Manager</a>
     <ul class="nav">
      <li class="%s"><a href="#"><i class="icon-home icon-white"></i> Home</a></li>
-     <li><a href="http://github.com/"><i class="icon-question-sign icon-white"></i> About</a></li>
+     <li><a href="https://github.com/sergiosgc/ZeroMass-Plugins#installing-the-plugin-manager"><i class="icon-question-sign icon-white"></i> About</a></li>
     </ul>
    </div>
   </div>
