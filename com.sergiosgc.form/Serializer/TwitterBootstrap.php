@@ -88,6 +88,19 @@ EOS
     public function getLayout() {/*{{{*/
         return $this->layout;
     }/*}}}*/
-
+    public static function helpBlock($help, $error) {/*{{{*/
+        if (is_null($help) && is_null($error)) return '';
+        if (!is_null($error)) {
+            $separator = '';
+            $errorStr = '';
+            if (is_string($error)) $error = array($error);
+            foreach ($error as $err) {
+                $errorStr .= $separator . $err;
+                $separator = '<br>';
+            }
+            return sprintf('<span class="help-inline">%s</span>', $errorStr);
+        }
+        return sprintf('<span class="help-inline">%s</span>', $help);
+    }/*}}}*/
 }
 ?>
