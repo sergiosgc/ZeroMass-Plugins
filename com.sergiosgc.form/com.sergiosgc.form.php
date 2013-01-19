@@ -265,6 +265,15 @@ class Form implements \IteratorAggregate
         $this->setInputErrors($result['fields']);
         return $result;
     }/*}}}*/
+    public function getValues() {/*{{{*/
+        $it = $this->getIterator();
+        $result = array();
+        foreach ($it as $member) {
+            if (!is_callable(array($member, 'getValue'))) continue;
+            $result[$member->getName()] = $member->getValue();
+        }
+        return $result;
+    }/*}}}*/
 }
 /*# 
  * Object-oriented HTML form representation with pluggable serializers and validations
