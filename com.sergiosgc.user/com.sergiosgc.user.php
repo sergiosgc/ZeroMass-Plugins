@@ -120,7 +120,7 @@ class User {
          * @param \com\sergiosgc\form\Form The signup form
          * @return \com\sergiosgc\form\Form The signup form
          */
-        $form = @\ZeroMass::do_callback('com.sergiosgc.user.signup.form', $form);
+        $form = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.form', $form);
         return $form;
     }/*}}}*/
     public function signupForm($form = null) {/*{{{*/
@@ -134,8 +134,8 @@ class User {
          * @param \com\sergiosgc\form\Form_Serializer The form serializer
          * @return \com\sergiosgc\form\Form_Serializer The form serializer
          */
-        $serializer = @\ZeroMass::do_callback('com.sergiosgc.user.signup.form_serializer', $serializer);
-        @\ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
+        $serializer = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.form_serializer', $serializer);
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
         $serialized = $serializer->serialize($form);
         /*#
          * The plugin is about to output the signup form. Allow the html to be mangled
@@ -143,7 +143,7 @@ class User {
          * @param string The form
          * @return string The form
          */
-        echo @\ZeroMass::do_callback('com.sergiosgc.user.signup.form_html', $serialized);
+        echo \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.form_html', $serialized);
     }/*}}}*/
     public function signup() {/*{{{*/
         $form = $this->generateSignupForm();
@@ -258,7 +258,7 @@ EOS
          * @param \com\sergiosgc\form\Form_Serializer The form serializer
          * @return \com\sergiosgc\form\Form_Serializer The form serializer
          */
-        $serializer = @\ZeroMass::do_callback('com.sergiosgc.user.login.form_serializer', $serializer);
+        $serializer = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.login.form_serializer', $serializer);
         \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
         $serialized = $serializer->serialize($form);
         /*#
