@@ -55,7 +55,18 @@ EOS
     <strong>Error!</strong> An exception was thrown when handling the request:
     </div>
 <h1>Message</h1>
-<?php print is_callable(array($e, 'getHtmlMessage')) ? $e->getHtmlMessage() : ('<pre><tt>' . $e->getMessage() . '</tt></pre>'); ?>
+<?php print is_callable(array($e, 'getHtmlMessage')) ? $e->getHtmlMessage() : ('<pre><tt>' . $e->getMessage() . '</tt></pre>'); 
+$previous = $e;
+while ($previous = $previous->getPrevious()) {
+    print('<blockquote>');
+    print is_callable(array($previous, 'getHtmlMessage')) ? $previous->getHtmlMessage() : ('<pre><tt>' . $previous->getMessage() . '</tt></pre>'); 
+}
+$previous = $e;
+while ($previous = $previous->getPrevious()) {
+    print('</blockquote>');
+}
+?>
+
 <h1>Stack trace</h1>
 <table class="table">
  <tr>
