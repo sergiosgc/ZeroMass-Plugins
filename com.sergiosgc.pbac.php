@@ -1,6 +1,6 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
-namespace com\sergiosgc;
+namespace com\sergiosgc\pbac;
 
 class Pbac {
     protected static $singleton = null;
@@ -16,6 +16,7 @@ class Pbac {
     }/*}}}*/
     protected function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.pluginInit', array($this, 'init'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.permission', array($this, 'assert'));
     }/*}}}*/
     /**
      * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
@@ -41,6 +42,14 @@ class Pbac {
         if ($result) $this->aPermissionWasChecked = true;
 
         return $result;
+        
+        // The code below is unreachable, and is here for documentation purposes only
+        /*#
+         * Filter a permission request, asserting the permission
+         *
+         * @param string Permission tag
+         */
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.pbac.assert', $permission);
     }/*}}}*/
     public function assert($permission) {/*{{{*/
         if (!$this->has($permission)) throw new UnauthorizedAccessException('Permission ' . $permission . ' not granted');
