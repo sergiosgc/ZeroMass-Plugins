@@ -4,7 +4,7 @@ namespace com\sergiosgc\form;
 class Test
 {
     public function __construct() {/*{{{*/
-         @\ZeroMass::register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleCurrentRequest'));
+         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleCurrentRequest'));
     }/*}}}*/
     public function handleCurrentRequest($handled) {/*{{{*/
         if ($handled) return $handled;
