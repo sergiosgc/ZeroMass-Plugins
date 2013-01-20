@@ -363,6 +363,9 @@ EOS
         if ($user === false) return false;
         return true;
     }/*}}}*/
+    public function getUrl($which) {/*{{{*/
+        return $this->url[$which];
+    }/*}}}*/
 }
 
 User::getInstance();
