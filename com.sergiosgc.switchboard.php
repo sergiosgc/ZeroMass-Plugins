@@ -60,7 +60,7 @@ class Switchboard {
         }
     }/*}}}*/
     public function throw404Exception($handled) {/*{{{*/
-        if ($handled) return;
+        if ($handled) return $handled;
         throw new \ZeroMassNotFoundException($_SERVER['REQUEST_URI'] . ' not found');
     }/*}}}*/
 
