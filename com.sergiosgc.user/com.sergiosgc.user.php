@@ -358,6 +358,11 @@ EOS
     public function getLoggedIn() {/*{{{*/
         return \com\sergiosgc\Facility::get('session')->get('user', true);
     }/*}}}*/
+    public function isLoggedIn() {/*{{{*/
+        $user = \com\sergiosgc\Facility::get('session')->get('user', false, false);
+        if ($user === false) return false;
+        return true;
+    }/*}}}*/
 }
 
 User::getInstance();
