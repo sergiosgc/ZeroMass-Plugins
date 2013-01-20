@@ -24,6 +24,7 @@ class Pbac {
         \com\sergiosgc\Facility::register('permission', $this);
     }/*}}}*/
     public function has($permission) {/*{{{*/
+        if ($permission == '') return true;
         $result = false;
         /*#
          * A permission request has been received. Attempt to grant the permission
