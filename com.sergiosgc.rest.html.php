@@ -204,7 +204,7 @@ class Html {
         $rows = \com\sergiosgc\Rest::getInstance()->read($entity);
         $table = new \com\sergiosgc\ui\Table();
         foreach($rows as $row) $table->addRow($row);
-        @\ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
         $table->output();
     }/*}}}*/
     public function delete($entity) {/*{{{*/
