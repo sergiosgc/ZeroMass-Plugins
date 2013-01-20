@@ -48,6 +48,20 @@ class Config {
         }
     }/*}}}*/
     /**
+     * Get subkeys immediately below a given key
+     *
+     * @param string key Configuration key
+     * @param boolean Whether to throw an exception if configuration key not found. Optional, defaults to true
+     * @param mixed Default value, should an exception not be thrown when configuration key not found. Optional, defaults to null
+     */
+    public function getKeys($key, $exceptionIfNotFound = true, $default = null) {/*{{{*/
+        $result = $this->get($key, $exceptionIfNotFound, $default);
+        if (!is_array($result) && $exceptionIfNotFound) throw new KeyNotFoundException(sprintf('Configuration under %s has no subkeys', $key));
+        if (!is_array($result)) return $default;
+        $result = array_keys($result);
+        return $result;
+    }/*}}}*/
+    /**
      * Set a configuration key
      *
      * This plugin is read-only, so this method throws a ConfigException if called
