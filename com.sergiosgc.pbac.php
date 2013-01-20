@@ -48,7 +48,7 @@ class Pbac {
          *
          * @param string Permission tag
          */
-        \ZeroMass::getInstance()->do_callback('com.sergiosgc.pbac.assert', $permission);
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.permission', $permission);
     }/*}}}*/
     public function assert($permission) {/*{{{*/
         if (!$this->has($permission)) throw new UnauthorizedAccessException('Permission ' . $permission . ' not granted');
