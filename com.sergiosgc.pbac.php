@@ -4,7 +4,6 @@ namespace com\sergiosgc\pbac;
 
 class Pbac {
     protected static $singleton = null;
-    protected $aPermissionWasChecked = false;
     /**
      * Singleton pattern instance getter
      *
@@ -39,7 +38,6 @@ class Pbac {
          * @return bool True if permission granted
          */
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.pbac', $result, $permission);
-        if ($result) $this->aPermissionWasChecked = true;
 
         return $result;
         
