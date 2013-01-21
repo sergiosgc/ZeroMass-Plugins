@@ -33,7 +33,7 @@ class Form implements \IteratorAggregate
     }/*}}}*/
     public static function registerAutoloader() {/*{{{*/
         if (!self::$registeredAutoload) {
-            spl_autoload_register(array('com\sergiosgc\form\Form', 'autoloader'));
+            spl_autoload_register(array(__CLASS__, 'autoloader'));
             self::$registeredAutoload = true;
         }
     }/*}}}*/
