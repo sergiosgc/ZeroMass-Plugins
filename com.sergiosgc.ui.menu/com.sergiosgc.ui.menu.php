@@ -94,6 +94,8 @@ abstract class MenuItem {
 }
 class Exception extends \Exception { }
 
+Menu::registerAutoloader();
+
 /*#
  * Single line
  *
