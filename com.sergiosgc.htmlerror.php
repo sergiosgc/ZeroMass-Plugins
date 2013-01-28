@@ -47,7 +47,11 @@ EOS
         , $this->title, $buffer);
     }/*}}}*/
     public function handleException($e) {/*{{{*/
-        header('HTTP/1.0 500 Internal Server Error. Uncaught exception while answering request');
+        if ($e instanceof \ZeroMassNotFoundException) {
+            header('HTTP/1.0 404 Not Found');
+        } else {
+            header('HTTP/1.0 500 Internal Server Error. Uncaught exception while answering request');
+        }
         $this->title = 'Exception while handling page';
         ob_start();
 ?>
