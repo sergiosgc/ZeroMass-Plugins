@@ -1,6 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 namespace com\sergiosgc\rest;
+use com\sergiosgc\form;
 
 class Html {
     protected static $singleton = null;
@@ -17,6 +18,7 @@ class Html {
     protected function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.registerEntity', array($this, 'registerEntity'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
+        \com\sergiosgc\form\Form::registerAutoloader();
     }/*}}}*/
     /**
      * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
@@ -137,35 +139,45 @@ class Html {
          * @return string The form action url
          */
         $formAction = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.formaction', $formAction, $entity);
-        $formClass = '';
-        /*#
-         * The plugin is producing a form for entity creation. Allow the form HTML class to be manipulated
-         *
-         * @param string The form class
-         * @param string The entity being created
-         * @return string The form class
-         */
-        $formClass = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.formclass', $formClass, $entity);
-        $submitButtonClass = 'btn btn-primary';
-        /*#
-         * The plugin is producing a form for entity creation. Allow the submit button class to be manipulated
-         *
-         * @param string The submit button class
-         * @param string The entity being created
-         * @return string The submit button class
-         */
-        $submitButtonClass = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.submitbuttonclass', $submitButtonClass, $entity);
-        \ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
 
-?>
-<form class="<?php echo $formClass ?>" method="post" action="<?php echo $formAction; ?>">
-<?php foreach($fields as $id => $field) if ($field['show']) { ?>
- <label for="<?php echo $id ?>"><?php echo $field['ui name'] ?></label>
- <input type="text" value="" name="<?php echo $id ?>">
-<?php } ?>
-<button class="<?php echo $submitButtonClass ?>" type="submit">Create</button>
-</form>
-<?php
+        $form = new form\Form($formAction, 'Create', '');
+        foreach($fields as $id => $field) if ($field['show']) {
+            $form->addMember($input = new form\Input_Text($id));
+            $input->setLabel($field['ui name']);
+        }
+        $form->addMember($input = new form\Input_Button('create'));
+        $input->setLabel('Create');
+
+        /*#
+         * The plugin has just created a form for REST create. Allow it to be mangled
+         *
+         * @param \com\sergiosgc\form\Form The form
+         * @param string The entity being created
+         * @return \com\sergiosgc\form\Form The form
+         */
+        $form = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form', $form, $entity);
+        $serializer = new \com\sergiosgc\form\Serializer_TwitterBootstrap();
+        $serializer->setLayout('horizontal');
+
+        /*#
+         * The plugin is about to serialize the REST create form. Allow the serializer to be mangled
+         *
+         * @param \com\sergiosgc\form\Form_Serializer The form serializer
+         * @param string The entity being created
+         * @return \com\sergiosgc\form\Form_Serializer The form serializer
+         */
+        $serializer = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.serializer', $serializer, $entity);
+        $serialized = $serializer->serialize($form);
+        /*#
+         * The plugin is about to output the login form. Allow the html to be mangled
+         *
+         * @param string The form
+         * @return string The form
+         */
+        $serialized = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.html', $serialized);
+        if ($serialized == '' || is_null($serialized)) return;
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
+        echo $serialized;
     }/*}}}*/
     public function read($entity) {/*{{{*/
         $result = new \com\sergiosgc\RestNoData();
@@ -283,9 +295,10 @@ class Html {
         foreach($reflection->getPrimaryKeys($table) as $key) $fields[$key]['primaryKey'] = true;
         foreach(array_keys($fields) as $field) {
             $fields[$field]['show'] = true;
-//            if ($fields[$field]['primaryKey'] && !is_null($fields[$field]['default'] )) $fields[$field]['show'] = false;
+            if ($fields[$field]['primaryKey'] && !is_null($fields[$field]['default'] )) $fields[$field]['show'] = false;
             $fields[$field]['ui name'] = $fields[$field]['name'];
         }
+
         /*#
          * The plugin is producing a form for entity update. Allow field information to be manipulated
          *
@@ -308,24 +321,7 @@ class Html {
          * @return string The form action url
          */
         $formAction = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.update_form.formaction', $formAction, $entity);
-        $formClass = '';
-        /*#
-         * The plugin is producing a form for entity update. Allow the form HTML class to be manipulated
-         *
-         * @param string The form class
-         * @param string The entity being updated
-         * @return string The form class
-         */
-        $formClass = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.update_form.formclass', $formClass, $entity);
-        $submitButtonClass = 'btn btn-primary';
-        /*#
-         * The plugin is producing a form for entity update. Allow the submit button class to be manipulated
-         *
-         * @param string The submit button class
-         * @param string The entity being updated
-         * @return string The submit button class
-         */
-        $submitButtonClass = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.update_form.submitbuttonclass', $submitButtonClass, $entity);
+        
         $data = \com\sergiosgc\Rest::getInstance()->read($entity);
         /*#
          * The plugin is producing a form for entity update. Allow the data to be edited to be manipulated.
@@ -360,7 +356,48 @@ class Html {
         if (count($data) == 0) throw new Exception('No data read from entity when creating update form');
         if (count($data) > 1) throw new Exception('More than one row read from entity when creating update form');
         $data = $data[0];
-        \ZeroMass::do_callback('com.sergiosgc.contentType', 'text/html');
+        
+        $form = new form\Form($formAction, 'Create', '');
+        foreach($fields as $id => $field) if ($field['show']) {
+            $form->addMember($input = new form\Input_Text($id));
+            $input->setLabel($field['ui name']);
+            $input->setValue($data[$id]);
+        }
+        $form->addMember($input = new form\Input_Button('update'));
+        $input->setLabel('Update');
+
+        /*#
+         * The plugin has just created a form for REST create. Allow it to be mangled
+         *
+         * @param \com\sergiosgc\form\Form The form
+         * @param string The entity being created
+         * @return \com\sergiosgc\form\Form The form
+         */
+        $form = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form', $form, $entity);
+        $serializer = new \com\sergiosgc\form\Serializer_TwitterBootstrap();
+        $serializer->setLayout('horizontal');
+
+        /*#
+         * The plugin is about to serialize the REST create form. Allow the serializer to be mangled
+         *
+         * @param \com\sergiosgc\form\Form_Serializer The form serializer
+         * @param string The entity being created
+         * @return \com\sergiosgc\form\Form_Serializer The form serializer
+         */
+        $serializer = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.serializer', $serializer, $entity);
+        $serialized = $serializer->serialize($form);
+        /*#
+         * The plugin is about to output the login form. Allow the html to be mangled
+         *
+         * @param string The form
+         * @return string The form
+         */
+        $serialized = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.create_form.html', $serialized);
+        if ($serialized == '' || is_null($serialized)) return;
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
+        echo $serialized;
+        return;
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
 
 ?>
 <form class="<?php echo $formClass ?>" method="post" action="<?php echo $formAction; ?>">
