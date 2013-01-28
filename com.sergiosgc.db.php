@@ -82,6 +82,7 @@ class DB {
         $args = func_get_args();
         array_shift($args);
         $this->connect($args);
+        $this->handleNonBasicTypes($query, $args);
         $preparedStatement = $this->connection->prepare($query);
         if ($preparedStatement === false) throw new DBQueryException($this->connection, $query, $args);
         if ($preparedStatement->execute($args) === false) throw new DBQueryException($preparedStatement, $query, $args);
@@ -248,6 +249,44 @@ class DB {
     public function getUsername() {/*{{{*/
         return $this->username;
     }/*}}}*/
+    protected function handleNonBasicTypes(&$query, &$args) {
+        do {
+            $repeat = false;
+            for ($i=0; $i<count($args); $i++) {
+                switch (gettype($args[$i])) {
+                    case'boolean':
+                    case'integer':
+                    case'double' :
+                    case'string':
+                    case'NULL':
+                        break;
+                    case'array':
+                    case'object':
+                    case'resource':
+                    case'unknown type':
+                    default:
+                        $this->handleNonBasicType($query, $args, $i);
+                        $repeat = true;
+                        break;
+                }
+            }
+        } while ($repeat);
+    }
+    protected function handleNonBasicType(&$query, &$args, $pos) {
+        $placeholderPos = $this->strposn($query, '?', $pos);
+        $queryLeft = substr($query, 0, $placeholderPos);
+        $queryRight = substr($query, $placeholderPos + 1);
+        $leftArgs = array_slice($args, 0, $pos);
+        $arg = $args[$pos];
+        $rightArgs = array_slice($args, $pos + 1);
+        switch ($this->driver) {
+            default:
+                throw new \Exception('Do not know how to handle ' . gettype($arg) . ' using ' . $this->driver . ' DB driver.');
+        }
+
+
+
+    }
 }
 
 class DBException extends \Exception { }
