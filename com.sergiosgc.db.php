@@ -280,6 +280,30 @@ class DB {
         $arg = $args[$pos];
         $rightArgs = array_slice($args, $pos + 1);
         switch ($this->driver) {
+            case 'pgsql':
+                switch (gettype($arg)) {
+                    case'array':
+                        $newArg = array();
+                        $middleQuery = 'ARRAY[';
+                        $separator = '';
+                        foreach ($arg as $elm) {
+                            $newArg[] = $elm;
+                            $middleQuery .= $separator . '?';
+                            $separator = ',';
+                        }
+                        $middleQuery .= ']';
+                        $query = $queryLeft . $middleQuery . $queryRight;
+                        $args = array_merge($leftArgs, $newArg, $rightArgs);
+                        return;
+                        break;
+                    case'object':
+                    case'resource':
+                    case'unknown type':
+                    default:
+                        throw new \Exception('Do not know how to handle ' . gettype($arg) . ' using ' . $this->driver . ' DB driver.');
+                        break;
+                }
+                break;
             default:
                 throw new \Exception('Do not know how to handle ' . gettype($arg) . ' using ' . $this->driver . ' DB driver.');
         }
@@ -287,6 +311,95 @@ class DB {
 
 
     }
+    protected function strposn($haystack, $needle, $n) {
+        $n++;
+        for ($i=0; $n > 0 && $i < strlen($haystack); $i++) if ($haystack[$i] == $needle) $n--;
+        if ($i == strlen($haystack)) return false;
+        return $i-1;
+    }
+
+    /**
+     * parse a postgres array (string) into a PHP array
+     *
+     * @author dchan@sigilsoftware.com
+     */
+    public function pg_array_parse($arraystring, $reset=true) { /*{{{*/
+        static $i = 0;
+        if ($reset) $i = 0;
+
+        $matches = array();
+        $indexer = 1;   // by default sql arrays start at 1
+
+        // handle [0,2]= cases
+        if (preg_match('/^\[(?P<index_start>\d+):(?P<index_end>\d+)]=/', substr($arraystring, $i), $matches)) {
+            $indexer = (int)$matches['index_start'];
+            $i = strpos($arraystring, '{');
+        } 
+        
+        if ($arraystring[$i] != '{') {
+            return NULL;
+        }
+        
+        if (is_array($arraystring)) return $arraystring;
+
+        // handles btyea and blob binary streams
+        if (is_resource($arraystring)) return fread($arraystring, 4096);
+
+        $i++;
+        $work = array();
+        $curr = '';
+        $length = strlen($arraystring);
+        $count = 0;
+        while ($i < $length)
+        {
+            // echo "\n [ $i ] ..... $arraystring[$i] .... $curr";
+            switch ($arraystring[$i])
+            {
+            case '{':
+                $sub = $this->pg_array_parse($arraystring, false);
+                if(!empty($sub)) {
+                    $work[$indexer++] = $sub;
+                }
+                break;
+            case '}':
+                $i++;
+                if (!empty($curr)) $work[$indexer++] = $curr;
+                return $work;
+                break;
+            case '\\':
+                $i++;
+                $curr .= $arraystring[$i];
+                $i++;
+                break;
+            case '"':
+                $openq = $i;
+                do {
+                    $closeq = strpos($arraystring, '"' , $i + 1);
+                    if ($closeq > $openq && $arraystring[$closeq - 1] == '\\') {
+                        $i = $closeq;
+                    } else {
+                        break;
+                    }
+                } while(true);
+                if ($closeq <= $openq) {
+                    throw new \Exception('Unexpected condition $closeq <= $openq on ' . $arraystring . ' ' . $closeq . ',' . $openq);
+                }
+
+                $curr .= substr($arraystring, $openq + 1, $closeq - ($openq + 1));
+
+                $i = $closeq + 1;
+                break;
+            case ',':
+                if (!empty($curr)) $work[$indexer++] = $curr;
+                $curr = '';
+                $i++;
+                break;
+            default:
+                $curr .= $arraystring[$i];
+                $i++;
+            }
+        }
+    }/*}}}*/
 }
 
 class DBException extends \Exception { }
