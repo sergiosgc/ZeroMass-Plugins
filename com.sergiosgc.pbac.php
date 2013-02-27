@@ -25,6 +25,7 @@ class Pbac {
     }/*}}}*/
     public function has($permission) {/*{{{*/
         if ($permission == '') return true;
+
         $result = false;
         /*#
          * A permission request has been received. Attempt to grant the permission
@@ -62,11 +63,69 @@ Pbac::getInstance();
 /*#
  * Permission based access control
  *
- * 
+ * This plugin exposes an API for permission based access control.
+ * It does not actually grant any permissions, so for it to be usable
+ * a complementary plugin, such as `com.sergiosgc.rbac` must be 
+ * installed.
  *
  * # Usage summary 
  *
- * TBD
+ * This is the application-facing interface for access control based on 
+ * permission requests. A permission is a string tag, developer-readable
+ * but never directly exposed to the user. Example permissions:
+ *
+ *     'reader'
+ *     'commenter'
+ *     'edit_own_content'
+ *     'edit_team_content'
+ *     'super_admin'
+ *
+ * ## Client usage
+ *
+ * This plugin is to be used by other plugins, to state permissions required
+ * for execution of an operation. Two entrypoints may be used: hook based or 
+ * object-oriented.
+ *
+ * The hook based entry point is called like this:
+ *
+ *     \ZeroMass::getInstance()->do_callback('com.sergiosgc.permission', 'somePermission');
+ *
+ * If this plugin is installed, the callback will return only if the 
+ * permission is granted. If the permission is not granted, an 
+ * UnauthorizedAccessException is thrown. 
+ *
+ * If this plugin is not installed, the callback is a no-op.
+ *
+ * The object-oriented entry point introduces a dependency on this plugin
+ * and is called like this:
+ * 
+ *     \com\sergiosgc\pbac\Pbac::getInstance()->assert('somePermission');
+ *
+ * or like this:
+ *
+ *     \com\sergiosgc\pbac\Pbac::getInstance()->has('somePermission');
+ *
+ * The first form will throw an exception if the permission is not granted. 
+ * The second form will return false.
+ *
+ * Use the hook based entry point to avoid creating a dependency on this plugin,
+ * or use the object-oriented if you are sure of the dependency. When in doubt,
+ * use the hook based entry point.
+ *
+ * ## Granting permissions
+ *
+ * Granting permissions requires more infrastructure than what this plugin 
+ * provides (user identification, authentication, session management). So,
+ * in true AOP, this plugin does not do it. It fires a `com.sergiosgc.pbac`
+ * hook, with an ungranted permission, and allows other plugins to grant the 
+ * permission. One such plugin, designed to be a companion, is 
+ * `com.sergiosgc.rbac` a role based access control plugin.
+ *
+ * The basic design driver is that client applications -- the code that 
+ * actually needs to get permission to run -- do not need to care if 
+ * permissions are organized in roles, directly assigned to users or dependent
+ * on the day of the month. Plugins only require a permission, and that is 
+ * then somehow dealt with.
  *
  * @author Sérgio Carvalho <sergiosgc@gmail.com>
  * @copyright 2012, Sérgio Carvalho

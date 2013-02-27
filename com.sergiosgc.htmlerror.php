@@ -15,7 +15,7 @@ class HtmlError {
     protected function __construct() {/*{{{*/
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage.exception', array($this, 'handleException'));
     }/*}}}*/
-    public function outputPage($buffer) {/*{{{*/
+    protected function outputPage($buffer) {/*{{{*/
         header('Content-type: text/html; charset=utf-8');
         printf(<<<EOS
 <!DOCTYPE html>
@@ -46,6 +46,12 @@ class HtmlError {
 EOS
         , $this->title, $buffer);
     }/*}}}*/
+    /**
+     * Handler for com.sergiosgc.zeromass.answerPage.exception that outputs the error in HTML
+     *
+     * @param exception The thrown exception
+     * @return boolean false, stating that the exception has been handled
+     */
     public function handleException($e) {/*{{{*/
         if ($e instanceof \ZeroMassNotFoundException) {
             header('HTTP/1.0 404 Not Found');

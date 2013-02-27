@@ -225,6 +225,38 @@ EOQ
             case 'timestamp':
             case 'timestamptz':
                 return 'timestamp';
+            case '_bool':
+                return 'boolean[]';
+            case '_char':
+            case '_box':
+            case '_varchar':
+            case '_text':
+                return 'character[]';
+            case '_date':
+                return 'date[]';
+            case '_decimal':
+            case '_money':
+                return 'decimal[]';
+            case '_float4':
+            case '_float8':
+                return 'float[]';
+            case '_int2':
+                return 'smallint[]';
+            case '_oid':
+            case '_xid':
+            case '_int4':
+            case '_int8':
+                return 'integer[]';
+            case '_interval':
+                return 'interval[]';
+            case '_numeric':
+                return 'numeric[]';
+            case '_time':
+            case '_timetz':
+                return 'time[]';
+            case '_timestamp':
+            case '_timestamptz':
+                return 'timestamp[]';
             default:
                 throw new Exception('Unknown SQL92 type for native type \'' . $type . '\'');
         }

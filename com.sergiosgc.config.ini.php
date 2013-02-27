@@ -36,6 +36,12 @@ class Config {
     protected function readConfig() {/*{{{*/
         if (!is_null($this->config)) return;
         $configFilePath = \ZeroMass::getInstance()->privateDir . '/config.ini';
+        /*#
+         * Allow the default config file path to be mangled
+         *
+         * @param string Config file absolute path
+         * @return string Config file absolute path
+         */
         $configFilePath = \ZeroMass::getInstance()->do_callback('com.sergiosgc.config.ini.configFilePath', $configFilePath);
         if (!file_exists($configFilePath)) throw new ConfigException(sprintf('Configuration file not found: %s', $configFilePath));
         if (!is_readable($configFilePath)) throw new ConfigException(sprintf('Configuration file is not readable: %s', $configFilePath));
@@ -45,6 +51,12 @@ class Config {
         foreach ($config as $key => $value) $this->_set($deepConfig, $key, $value);
         $config = $deepConfig;
 
+        /*# 
+         * The configuration has been read. Allow it to be mangled.
+         *
+         * @param array Configuration, as a tree of keys, where leafs are config value
+         * @return array Configuration, as a tree of keys, where leafs are config value
+         */
         $config = \ZeroMass::getInstance()->do_callback('com.sergiosgc.config.ini.config', $config);
         $this->config = $config;
     }/*}}}*/

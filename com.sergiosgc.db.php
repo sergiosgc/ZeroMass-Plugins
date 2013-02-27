@@ -244,12 +244,13 @@ class DB {
         return $quote . strtr($name, array($escape => '', $quote => '')) . $quote;
     }/*}}}*/
     public function getDriver() {/*{{{*/
+        if (is_null($this->driver)) $this->connect();
         return $this->driver;
     }/*}}}*/
     public function getUsername() {/*{{{*/
         return $this->username;
     }/*}}}*/
-    protected function handleNonBasicTypes(&$query, &$args) {
+    protected function handleNonBasicTypes(&$query, &$args) {/*{{{*/
         do {
             $repeat = false;
             for ($i=0; $i<count($args); $i++) {
@@ -271,8 +272,8 @@ class DB {
                 }
             }
         } while ($repeat);
-    }
-    protected function handleNonBasicType(&$query, &$args, $pos) {
+    }/*}}}*/
+    protected function handleNonBasicType(&$query, &$args, $pos) {/*{{{*/
         $placeholderPos = $this->strposn($query, '?', $pos);
         $queryLeft = substr($query, 0, $placeholderPos);
         $queryRight = substr($query, $placeholderPos + 1);
@@ -310,13 +311,13 @@ class DB {
 
 
 
-    }
-    protected function strposn($haystack, $needle, $n) {
+    }/*}}}*/
+    protected function strposn($haystack, $needle, $n) {/*{{{*/
         $n++;
         for ($i=0; $n > 0 && $i < strlen($haystack); $i++) if ($haystack[$i] == $needle) $n--;
         if ($i == strlen($haystack)) return false;
         return $i-1;
-    }
+    }/*}}}*/
 
     /**
      * parse a postgres array (string) into a PHP array

@@ -68,6 +68,28 @@ class Page {
                     print $this->primaryOutput;
                     continue;
                 }
+                /*#
+                 * Request a component that is present in the page template
+                 *
+                 * In response to a component included in the page template, 
+                 * this callback will be called, allowing for plugins to 
+                 * provide the component.
+                 *
+                 * A component is present in the template file if a line 
+                 * with this format occurs
+                 *
+                 *      __component-name__
+                 *
+                 * Where `component-name` is replaced by the actual component
+                 * name. Example:
+                 *
+                 *      __primaryMenu__
+                 *
+                 * The expected behaviour is for the component markup to be 
+                 * output by callback handlers, not returned.
+                 *
+                 * @param string Component name
+                 */
                 \ZeroMass::getInstance()->do_callback('com.sergiosgc.page.component', $part['name']);
             }
         }

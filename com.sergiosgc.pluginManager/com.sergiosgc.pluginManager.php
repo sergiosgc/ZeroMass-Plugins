@@ -84,6 +84,7 @@ class PluginManager {
         return true;
     }/*}}}*/
     public function pluginDetail() {/*{{{*/
+        \ZeroMass::getInstance()->do_callback('com.sergiosgc.permission', '');
         require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'com.sergiosgc.pluginManagerPage.php');
         preg_match('_[^/]+$_', $_SERVER['REQUEST_URI'], $matches);
         $pluginId = $matches[0];
