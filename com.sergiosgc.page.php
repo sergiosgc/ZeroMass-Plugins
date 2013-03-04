@@ -88,9 +88,11 @@ class Page {
                  * The expected behaviour is for the component markup to be 
                  * output by callback handlers, not returned.
                  *
+                 * @param boolean True if the component has already been handled
                  * @param string Component name
+                 * @return boolean True if the component has already been handled
                  */
-                \ZeroMass::getInstance()->do_callback('com.sergiosgc.page.component', $part['name']);
+                \ZeroMass::getInstance()->do_callback('com.sergiosgc.page.component', false, $part['name']);
             }
         }
     }/*}}}*/
