@@ -109,9 +109,9 @@ class Form implements \IteratorAggregate
     }
     /* }}} */
     /* members field delegation {{{ */
-    public function addMember(Member $val)
+    public function addMember(Member $val, $before = null)
     {
-        $this->topMemberSet->addMember($val);
+        $this->topMemberSet->addMember($val, $before);
     }
     public function getMembers()
     {
@@ -128,6 +128,9 @@ class Form implements \IteratorAggregate
     public function removeMember($index)
     {
         $this->topMemberSet->removeMember($index);
+    }
+    public function moveMemberBefore($member, $reference) {
+        $this->topMemberSet->moveMemberBefore($member, $reference);
     }
     public function getInput($name) {
         $it = $this->getIterator();

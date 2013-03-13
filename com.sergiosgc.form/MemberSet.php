@@ -14,9 +14,15 @@ class MemberSet extends Member implements \RecursiveIterator
     /* }}} */
     /* members field {{{ */
     public $members = array();
-    public function addMember(Member $val)
+    public function addMember(Member $val, $before = null)
     {
-        $this->members[] = $val;
+        if (is_null($before)) {
+            $this->members[] = $val;
+        } else {
+            $referenceIndex = $this->getMemberIndex($before);
+            for ($i=count($this->members); $i>$referenceIndex; $i--) $this->members[$i] = $this->members[$i-1];
+            $this->members[$referenceIndex] = $val;
+        }
     }
     public function getMembers()
     {
@@ -36,7 +42,16 @@ class MemberSet extends Member implements \RecursiveIterator
         if ($index instanceof Member) return $this->removeMember($this->getMemberIndex($index));
         unset($this->members[$index]);
         $this->members = array_values($this->members);
+    } 
+    public function moveMemberBefore($member, $reference) {
+        $memberIndex = $this->getMemberIndex($member);
+        unset($this->members[$memberIndex]);
+        $this->members = array_values($this->members);
+        $referenceIndex = $this->getMemberIndex($before);
+        for ($i=count($this->members); $i>$referenceIndex; $i--) $this->members[$i] = $this->members[$i-1];
+        $this->members[$referenceIndex] = $member;
     }
+
     /* }}} */
     /* toString {{{ */
     public function __toString()
