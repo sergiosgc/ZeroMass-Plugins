@@ -16,6 +16,9 @@ class Table {
     public $fields;
     public $rows = array();
     public $columnCount;
+    public $classes = array();
+    public $links = array();
+    public $rowActions = array();
     public function addRow($row) {/*{{{*/
         if (!is_array($row)) throw new \ZeroMassException('row parameter must be an array');
         if ($this->isHash($row)) {
@@ -48,21 +51,105 @@ class Table {
         foreach(array_keys($array) as $key) if ($key != ((int) $key)) return true;
         return false;
     }/*}}}*/
+    public function getHeaders() {/*{{{*/
+        if (!isset($this->headers)) {
+            $row = array_values($this->rows);
+            if (count($row) == 0) return array();
+            $row = $row[0];
+            $this->headers = array();
+            foreach ($row as $field => $value) $this->headers[$field] = $field;
+        }
+        return $this->headers;
+    }/*}}}*/
+    public function setHeaders($headers) {/*{{{*/
+        if (is_array($headers)) {
+            $this->headers = $headers;
+        } else {
+            $headers = array_values(func_get_args());
+            $row = array_values($this->rows);
+            if (count($row) == 0) return;
+            $row = $row[0];
+            $this->headers = array();
+            foreach (array_keys($row) as $i => $field) {
+                $this->headers[$field] = $headers[$i];
+            }
+        }
+    }/*}}}*/
+    public function addClass($class) {/*{{{*/
+        $this->classes[] = $class;
+    }/*}}}*/
+    public function removeClass($class) {/*{{{*/
+        if (!in_array($class, $this->classes)) return;
+        foreach ($this->classes as $index => $test) if ($test == $class) {
+            unset($this->classes[$index]);
+            $this->classes = array_values($this->classes);
+            return;
+        }
+    }/*}}}*/
+    public function addLink($column, $printfPattern) {/*{{{*/
+        $args = func_get_args();
+        array_shift($args);
+        array_shift($args);
+        $this->links[$column] = array('href' => $printfPattern, 'args' => $args);
+    }/*}}}*/
+    public function addRowAction($label, $printfPattern) {/*{{{*/
+        $args = func_get_args();
+        array_shift($args);
+        array_shift($args);
+        $this->rowActions[] = array('label' => $label, 'href' => $printfPattern, 'args' => $args);
+    }/*}}}*/
+
     public function output() {/*{{{*/
 ?>
-<table class="table">
+<table class="table<?php foreach($this->classes as $class) echo " $class"; ?>">
+ <thead>
+  <tr>
+<?php
+        foreach ($this->getHeaders() as $field => $value) {
+?>
+   <th class="field-<?php echo $field ?>"><?php echo $value ?></th>
+<?php
+        }
+        if (count($this->rowActions) > 0) print('<th class="row-actions"> </th>');
+?>
+  </tr>
+ </thead>
  <tbody>
 <?php 
         foreach ($this->rows as $row) {
 ?>
   <tr>
 <?php       foreach ($row as $field => $value) { ?>
-   <td class="field-<?php echo $field ?>"><?php echo $value ?></td>
-<?php } ?>
-  </tr>
-<?php
-        }
+<td class="field-<?php echo $field ?>"><?php
+if (isset($this->links[$field])) { 
+    $values = array();
+    $values[0] = $this->links[$field]['href'];
+    foreach ($this->links[$field]['args'] as $arg) $values[] = $row[$arg];
+    printf('<a href="%s">%s</a>', call_user_func_array('sprintf', $values), $value); 
+   } else {
+       echo $value;
+   }
+?></td>
+<?php } 
+if (count($this->rowActions) > 0) {
 ?>
+<td class="row-actions">
+<div class="btn-group">
+<?php printf('<button class="btn dropdown-toggle" data-toggle="dropdown">%s <span class="caret"></span></button>', __('Actions')); ?>
+<ul class="dropdown-menu">
+<?php 
+foreach ($this->rowActions as $action) { 
+    $values = array();
+    $values[0] = $action['href'];
+    foreach($action['args'] as $arg) $values[] = $row[$arg];
+    printf('<li><a href="%s">%s</a></li>', call_user_func_array('sprintf', $values), $action['label']);
+}
+?>
+<?php } ?>
+</ul>
+</td>
+</tr>
+<?php } ?>
  </tbody>
 </table>
 <?php
