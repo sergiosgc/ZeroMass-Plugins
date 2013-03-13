@@ -216,6 +216,13 @@ class Html {
         $rows = \com\sergiosgc\Rest::getInstance()->read($entity);
         $table = new \com\sergiosgc\ui\Table();
         foreach($rows as $row) $table->addRow($row);
+        /*#
+         * The plugin is producing a table listing an entity (read). Allow the result table to be manipulated
+         *
+         * @param \com\sergiosgc\ui\Table Data table
+         * @return \com\sergiosgc\ui\Table Data table
+         */
+        $table = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.read.table', $table);
         \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
         $table->output();
     }/*}}}*/
