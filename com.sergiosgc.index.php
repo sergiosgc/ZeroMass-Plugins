@@ -20,7 +20,7 @@ class Index {
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
 
-        $candidate = realpath(\ZeroMass::getInstance()->publicDir) . $_SERVER['REQUEST_URI'];
+        $candidate = realpath(\ZeroMass::getInstance()->publicDir) . preg_replace('_[?].*_', '', $_SERVER['REQUEST_URI']);
         if ('/' === $candidate[strlen($candidate) - 1]) {
             $candidate .= 'index.zm.php';
         } else {
