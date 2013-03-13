@@ -32,12 +32,12 @@ class User {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.create.fields', array($this, 'hashPasswordOnCreateUpdate'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.fields', array($this, 'hashPasswordOnCreateUpdate'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.user.login.validate', array($this, 'validateLogin'));
-        \com\sergiosgc\form\Form::registerAutoloader();
     }/*}}}*/
     /**
      * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
      */
     public function init() {/*{{{*/
+        \com\sergiosgc\form\Form::registerAutoloader();
         \com\sergiosgc\Facility::register('user', $this);
     }/*}}}*/
     public function config() {/*{{{*/
