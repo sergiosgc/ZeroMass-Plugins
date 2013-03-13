@@ -7,16 +7,24 @@ class BootstrapSerializer
     protected $list = false;
     protected $pills = false;
     protected $tabs = true;
+    protected $brand = false;
     public function __construct() {
+    }
+    public function enableBrand($brand = true) {
+        $this->brand = $brand;
+        return $this;
     }
     public function setStacked($to = true) {
         $this->stacked = $to;
+        return $this;
     }
     public function setPills($to = true) {
         $this->pills = $to;
+        return $this;
     }
     public function setTabs($to = true) {
         $this->tabs = $to;
+        return $this;
     }
     public function serialize(Menu $menu) {
         $this->serializeMenu($menu, true);
@@ -34,7 +42,12 @@ class BootstrapSerializer
         if ($this->pills) $class .= ' nav-pills';
         if ($this->list) $class .= ' nav-list';
         if ($this->tabs) $class .= ' nav-tabs';
+        $items = $menu->getItems();
         if ($topLevel) {
+            if ($this->brand) {
+                printf('<a href="%s" class="navbar-brand brand">%s</a>', $items[0]->getHref(), $items[0]->getLabel());
+                array_shift($items);
+            }
             printf("<ul class=\"%s\">\n", $class);
         } else {
             $liClass = $menu->getActive() ? 'active' : '';
@@ -45,7 +58,7 @@ class BootstrapSerializer
                 $menu->getLabel(),
                 "\n");
         }
-        foreach ($menu->getItems() as $item) {
+        foreach ($items as $item) {
             $this->serializeItem($item);
         }
         if ($topLevel) print("</ul>\n"); else print("</ul></li>\n");
