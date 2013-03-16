@@ -4,8 +4,8 @@ namespace com\sergiosgc;
 
 class Rest {
     protected static $singleton = null;
-    protected $baseURL = '/rest/';
-    protected $entities = array();
+    protected $entityTableMap = array();
+    protected $urlEntityMap = array();
     /**
      * Singleton pattern instance getter
      * @return Config The singleton Config
@@ -27,37 +27,40 @@ class Rest {
         \com\sergiosgc\Facility::register('REST', $this);
     }/*}}}*/
     public function config() {/*{{{*/
-        $this->baseURL = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.rest.baseurl', false, $this->baseURL);
-        /*#
-         * Filter the base URL. URLs answered by the REST class will be of the form baseurl/entity_name
-         *
-         * @param string The base URL
-         * @return string The base URL
-         */
-        $this->baseURL = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.baseurl', $this->baseURL);
     }/*}}}*/
-    public function registerEntity($urlName, $dbTable) {/*{{{*/
-        $toFilter = array($urlName, $dbTable);
+    public function registerEntity($entityName, $url = null, $dbTable = null) {/*{{{*/
+        if (is_null($url)) $url = $entityName;
+        if (is_null($dbTable)) $dbTable = $entityName;
+        $toFilter = array(
+            'entityName' => $entityName, 
+            'url' => $url,
+            'dbTable' => $dbTable);
 
         /*#
          * Allow the entity being registered to be filtered
          *
-         * @param array The entity, as two strings, urlName on index 0 and dbTable on index 1
-         * @return array The entity, as two strings, urlName on index 0 and dbTable on index 1, or null to abort registration
+         * The filtered parameter is an associative array with three elements: entityName, url, dbTable matching the three parameters
+         * to Rest::registerEntity
+         *
+         * @param array The entity as an associative array
+         * @return array The entity as an associative array or null to abort registration
          */
         $toFilter = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.registerEntity', $toFilter);
         if (is_null($toFilter)) return;
-        $urlName = $toFilter[0];
-        $dbTable = $toFilter[1];
-        $this->entities[$urlName] = $dbTable;
+        $entityName = $toFilter['entityName'];
+        $url = $toFilter['url'];
+        $dbTable = $toFilter['dbTable'];
+        unset($toFilter);
+        $this->entityTableMap[$entityName] = $dbTable;
+        $this->urlEntityMap[$url] = $entityName;
     }/*}}}*/
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
-        if ($this->baseURL != substr($_SERVER['REQUEST_URI'], 0, strlen($this->baseURL))) return $handled;
-        $requestedEntity = substr($_SERVER['REQUEST_URI'], strlen($this->baseURL));
-        $requestedEntity = preg_replace('_([^/]*).*_', '\1', $requestedEntity);
-        if (!is_string($requestedEntity) || 0 == strlen($requestedEntity)) return $handled;
-        if ($requestedEntity[strlen($requestedEntity) - 1] == '/') $requestedEntity = substr($requestedEntity, 0, strlen($requestedEntity) - 1);
+        $url = $_SERVER['REQUEST_URI'];
+        if ('?' == $url[strlen($url) - strlen($_SERVER['QUERY_STRING']) - 1]) $url = substr($url, 0, strlen($url) - strlen($_SERVER['QUERY_STRING']) - 1);
+        if (!isset($this->urlEntityMap[$url])) return $handled;
+
+        $requestedEntity = $this->urlEntityMap[$url];
         /*#
          * The plugin is about to answer a REST request. Allow it to be filtered
          *
@@ -68,9 +71,8 @@ class Rest {
          */
         $requestedEntity = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.request', $requestedEntity);
         if (is_null($requestedEntity) || $requestedEntity === false) return $handled;
-        if (!isset($this->entities[$requestedEntity])) return $handled;
-
         switch ($_SERVER['REQUEST_METHOD']) {
+        if (!isset($this->entityTableMap[$requestedEntity])) return $handled;
         case 'PUT':
             $result = $this->create($requestedEntity);
             break;
@@ -124,7 +126,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.pre', $result, $entity);
         if (get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
-        $table = $this->entities[$entity];
+        $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
         /*#
          * The plugin is answering a REST create (PUT) request. Allow the list of fields to insert to be filtered
@@ -162,7 +164,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.pre', $result, $entity);
         if (!is_object($result) || get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
-        $table = $this->entities[$entity];
+        $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
         /*#
          * The plugin is answering a REST read (GET) request. Allow the fields for creating the WHERE clause to be filtered
@@ -215,7 +217,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.pre', $result, $entity);
         if (get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
-        $table = $this->entities[$entity];
+        $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
         /*#
          * The plugin is answering a REST update (POST or PATCH) request. Allow the fields for creating the WHERE clause to be filtered
@@ -304,7 +306,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.pre', $result, $entity);
         if (get_class($result) != 'com\sergiosgc\RestNoData') return $result;
 
-        $table = $this->entities[$entity];
+        $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
         /*#
          * The plugin is answering a REST delete (DELETE) request. Allow the fields for creating the WHERE clause to be filtered
@@ -353,6 +355,14 @@ class Rest {
             $args[] = $value;
         }
         return array($where, $args);
+    }/*}}}*/
+    public function getTableFromEntity($entity) {/*{{{*/
+        if (!isset($this->entityTableMap[$entity])) throw new RestException('Unknown entity: ' . $entity);
+        return $this->entityTableMap[$entity];
+    }/*}}}*/
+    public function getUrlFromEntity($entity) {/*{{{*/
+        if (!in_array($entity, $this->urlEntityMap)) throw new RestException('Unknown entity: ' . $entity);
+        foreach($this->urlEntityMap as $url => $candidate) if ($candidate == $entity) return $url;
     }/*}}}*/
 }
 class RestNoData { }
