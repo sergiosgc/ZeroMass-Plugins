@@ -89,7 +89,6 @@ class Rest {
         default:
             return $handled;
         }
-        header('Content-type: application/json');
         /*#
          * The plugin has the result for a REST request. Allow it to be filtered
          *
@@ -98,15 +97,6 @@ class Rest {
          */
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.requestDone.raw', $result);
         $result = json_encode($result);
-        /*#
-         * The plugin has the result for a REST request. Allow it to be filtered, after being encoded
-         *
-         * @param string The result as JSON
-         * @return string The result as JSON
-         */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.requestDone.json', $result);
-
-        print($result);
 
         return true;
     }/*}}}*/
