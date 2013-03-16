@@ -365,12 +365,14 @@ Rest::getInstance();
 /*#
  * REST request handler
  *
- * Request handler that implements Representational state transfer on top of the DB facility
+ * Request handler that implements Representational state transfer on top of 
+ * the DB facility
  *
  * # Usage summary 
  *
- * Drop this plugin in your plugin directory. It will, by default, pickup requests under /rest/_entity_/. Register entities
- * and associated tables using `registerEntity`. It will, from then on, implement REST.
+ * Drop this plugin in your plugin directory. It will, by default, pickup 
+ * requests under /rest/_entity_/. Register entities and associated tables 
+ * using `registerEntity`. It will, from then on, implement REST.
  *
  * This plugin answers the four CRUD operations under five HTTP request methods:
  *
@@ -379,30 +381,38 @@ Rest::getInstance();
  *  - **U**pdate under the `PATCH` and `POST` methods
  *  - **D**elete under the `DELETE` method
  *
- * The plugin needs to associate database tables with request entities. Do so, using `Rest::registerEntity`. For example, to 
- * associate the entity `person` with database table `user`, call:
+ * The plugin needs to associate database tables with request entities. Do so, 
+ * using `Rest::registerEntity`. For example, to associate the entity `person` 
+ * with database table `user` at URI /person/, call:
  *
- *     Rest::getInstance()->registerEntity('person', 'user');
+ *     Rest::getInstance()->registerEntity('person', '/person/', 'user');
  *
- * Then, the plugin answers requests for that table under `/rest/person/`. It will use arguments passed on the URL as 
- * row selectors. For example, a `GET` on `/rest/person/?name=John` will return all rows of table `user` with column `name` 
- * equal to `John`.
+ * Then, the plugin answers requests for that table under `/person/`. It will 
+ * use arguments passed on the URL as row selectors. For example, a `GET` on 
+ * `/person/?name=John` will return all rows of table `user` with column 
+ * `name` equal to `John`.
  *
- * For requests that require data to write, the data must be passed in the request body. Using _curl_ to exemplify, this request:
+ * For requests that require data to write, the data must be passed in the 
+ * request body. Using _curl_ to exemplify, this request:
  *
- *     curl -i -H "Accept: application/json" -X PUT -d "name=Mary" http://example.com/rest/person/
+ *     curl -i -H "Accept: application/json" -X PUT -d "name=Mary" http://example.com/person/
  *
  * will create a new row on table user, with the column `name` set to `Mary`.
  *
- * Requests may require selectors and data to write, such as PATCH requests. This request:
+ * Requests may require selectors and data to write, such as PATCH requests. 
+ * This request:
  *
- *     curl -i -H "Accept: application/json" -X PATCH -d "name=Mary%20Jane" http://example.com/rest/person/?name=Mary
+ *     curl -i -H "Accept: application/json" -X PATCH -d "name=Mary%20Jane" http://example.com/person/?name=Mary
  *
- * will update all rows of the table `user` where the name equals `Mary` setting the name to `Mary Jane`.
+ * will update all rows of the table `user` where the name equals `Mary` 
+ * setting the name to `Mary Jane`.
  *
- * The plugin returns results as JSON. 
+ * The plugin outputs no result. This plugin should be coupled with appropriate
+ * output plugins, such as com.sergiosgc.rest.json or com.sergiosgc.rest.html 
+ * for output to be produced.
  *
- * The default behaviour is sensible, but even so most of the plugin behaviour can be changed via ZeroMass hooks to accommodate special needs
+ * The default behaviour is sensible, but even so most of the plugin behaviour
+ * can be changed via ZeroMass hooks to accommodate special needs.
  *
  * @author Sérgio Carvalho <sergiosgc@gmail.com>
  * @copyright 2012, Sérgio Carvalho
