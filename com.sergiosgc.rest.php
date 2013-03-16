@@ -19,6 +19,10 @@ class Rest {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.replaced_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.create.fields', array($this, 'ignoreHttpMethod'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.read.fields', array($this, 'ignoreHttpMethod'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.fields', array($this, 'ignoreHttpMethod'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.delete.fields', array($this, 'ignoreHttpMethod'));
     }/*}}}*/
     /**
      * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
@@ -54,6 +58,10 @@ class Rest {
         $this->entityTableMap[$entityName] = $dbTable;
         $this->urlEntityMap[$url] = $entityName;
     }/*}}}*/
+    public function ignoreHttpMethod($fields) {
+        unset($fields['com_sergiosgc_rest_httpmethod']);
+        return $fields;
+    }
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
         $url = $_SERVER['REQUEST_URI'];
@@ -71,8 +79,10 @@ class Rest {
          */
         $requestedEntity = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.request', $requestedEntity);
         if (is_null($requestedEntity) || $requestedEntity === false) return $handled;
-        switch ($_SERVER['REQUEST_METHOD']) {
         if (!isset($this->entityTableMap[$requestedEntity])) return $handled;
+        $method = $_SERVER['REQUEST_METHOD'];
+        if (isset($_REQUEST['com_sergiosgc_rest_httpmethod'])) $method = $_REQUEST['com_sergiosgc_rest_httpmethod'];
+        switch ($method) {
         case 'PUT':
             $result = $this->create($requestedEntity);
             break;
