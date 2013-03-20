@@ -1,12 +1,12 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 namespace com\sergiosgc\rest;
-use com\sergiosgc\form;
 
+use com\sergiosgc\form;
 class Html {
     protected static $singleton = null;
-    protected $baseURL = '/';
-    protected $entities = array();
+    protected $newUrlEntityMap = array();
+    protected $editUrlEntityMap = array();
     /**
      * Singleton pattern instance getter
      * @return Config The singleton Config
@@ -20,20 +20,16 @@ class Html {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
         \com\sergiosgc\form\Form::registerAutoloader();
     }/*}}}*/
-    /**
-     * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
-     */
     public function init() {/*{{{*/
     }/*}}}*/
-    public function config() {/*{{{*/
-        $this->baseURL = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.rest.html.baseurl', false, $this->baseURL);
-        /*#
-         * Filter the base URL. URLs answered by the REST class will be of the form baseurl/entity_name
-         *
-         * @param string The base URL
-         * @return string The base URL
-         */
-        $this->baseURL = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.baseurl', $this->baseURL);
+    public function handleRegisterEntity($args) {/*{{{*/
+        if (!in_array($args['entityName'], $this->newUrlEntityMap)) {
+            $this->setEntityNewUrl($args['entityName'], $args['url'] . ($args['url'][strlen($args['url']) - 1] == '/' ? '' : '/') . 'new/');
+        }
+        if (!in_array($args['entityName'], $this->editUrlEntityMap)) {
+            $this->setEntityEditUrl($args['entityName'], $args['url'] . ($args['url'][strlen($args['url']) - 1] == '/' ? '' : '/') . 'edit/');
+        }
+        return $args;
     }/*}}}*/
     public function registerEntity($entity) {/*{{{*/
         /*#
@@ -48,6 +44,19 @@ class Html {
         if (is_array($toRegister) && count($toRegister) == 2) $this->entities[$toRegister[0]] = $toRegister[1];
 
         return $entity;
+    public function setEntityNewUrl($entity, $url) {/*{{{*/
+        $this->newUrlEntityMap[$url] = $entity;
+    }/*}}}*/
+    public function getEntityNewUrl($entity) {/*{{{*/
+        foreach ($this->newUrlEntityMap as $url => $candidate) if ($candidate == $entity) return $url;
+        throw new \Exception('Unknown entity: ' . $entity);
+    }/*}}}*/
+    public function setEntityEditUrl($entity, $url) {/*{{{*/
+        $this->editUrlEntityMap[$url] = $entity;
+    }/*}}}*/
+    public function getEntityEditUrl($entity) {/*{{{*/
+        foreach ($this->editUrlEntityMap as $url => $candidate) if ($candidate == $entity) return $url;
+        throw new \Exception('Unknown entity: ' . $entity);
     }/*}}}*/
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
