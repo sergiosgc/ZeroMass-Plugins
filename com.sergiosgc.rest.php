@@ -20,9 +20,10 @@ class Rest {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.replaced_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.create.fields', array($this, 'ignoreHttpMethod'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.read.fields', array($this, 'ignoreHttpMethod'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.read.where.fields', array($this, 'ignoreHttpMethod'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.fields', array($this, 'ignoreHttpMethod'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.delete.fields', array($this, 'ignoreHttpMethod'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.where.fields', array($this, 'ignoreHttpMethod'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.delete.where.fields', array($this, 'ignoreHttpMethod'));
     }/*}}}*/
     /**
      * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
@@ -31,6 +32,13 @@ class Rest {
         \com\sergiosgc\Facility::register('REST', $this);
     }/*}}}*/
     public function config() {/*{{{*/
+        $keys = \com\sergiosgc\Facility::get('config')->getKeys('com.sergiosgc.rest.entityUrl');
+        $entitites = array();
+        foreach ($keys as $key) $entities[$key] = array('url' => \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.rest.entityUrl.' . $key));
+        foreach ($entities as $entity => $params) { 
+            $entities[$entity]['dbTable'] = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.rest.entityTable.' . $key, false, $entity);
+        }
+        foreach ($entities as $entity => $params) $this->registerEntity($entity, $params['url'], $params['dbTable']);
     }/*}}}*/
     public function registerEntity($entityName, $url = null, $dbTable = null) {/*{{{*/
         if (is_null($url)) $url = $entityName;
@@ -58,10 +66,10 @@ class Rest {
         $this->entityTableMap[$entityName] = $dbTable;
         $this->urlEntityMap[$url] = $entityName;
     }/*}}}*/
-    public function ignoreHttpMethod($fields) {
+    public function ignoreHttpMethod($fields) {/*{{{*/
         unset($fields['com_sergiosgc_rest_httpmethod']);
         return $fields;
-    }
+    }/*}}}*/
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
         $url = $_SERVER['REQUEST_URI'];
@@ -103,9 +111,10 @@ class Rest {
          * The plugin has the result for a REST request. Allow it to be filtered
          *
          * @param mixed The result as a PHP native type
+         * @param string Entity being processed
          * @return mixed The result as a PHP native type
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.requestDone.raw', $result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.requestDone.raw', $result, $requestedEntity);
         $result = json_encode($result);
 
         return true;
