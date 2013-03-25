@@ -25,12 +25,12 @@ EOS
 <div class="%s">
  <label class="control-label" for="%s-open">%s</label>
  <div class="controls">
-  <input type="text" name="%s-open" id="%s-open" />
+  <input class="input-with-feedback" type="text" name="%s-open" id="%s-open" />
  </div>
 </div>
 
 EOS
-                , is_null($choice->error) ? 'control-group' : 'control-group error'
+                , is_null($choice->error) ? 'control-group' : 'control-group has-error'
                 , $choice->getName(), 
                 __('Other:'),
                 $choice->getName(), 

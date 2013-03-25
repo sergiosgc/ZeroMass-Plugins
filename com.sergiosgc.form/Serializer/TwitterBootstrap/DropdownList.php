@@ -24,13 +24,13 @@ EOS
 <div class="%s">
 <label class="control-label" for="%s">%s</label>
 <div class="controls">
-<select name="%s"%s>%s</select>
+<select class="input-with-feedback" name="%s"%s>%s</select>
 %s        
 </div>      
 </div>      
 
 EOS
-                , is_null($choice->error) ? 'control-group' : 'control-group error'
+                , is_null($choice->error) ? 'control-group' : 'control-group has-error'
                 , Serializer_TwitterBootstrap::entitize($choice->name)
                 , $choice->getLabel()
                 , $choice->getName()
@@ -42,13 +42,13 @@ EOS
                 $result = sprintf(<<<EOS
 <div class="%s">
 <div class="controls">
-<select name="%s"%s>%s</select>
+<select class="input-with-feedback" name="%s"%s>%s</select>
 %s        
 </div>      
 </div>      
 
 EOS
-                , is_null($choice->error) ? 'control-group' : 'control-group error'
+                , is_null($choice->error) ? 'control-group' : 'control-group has-error'
                 , $choice->getName()
                 , count($choice->getRestrictionsByClass('\com\sergiosgc\form\Restriction_ExclusiveChoice')) > 0 ? '' : ' multiple="multiple"'
                 , $result

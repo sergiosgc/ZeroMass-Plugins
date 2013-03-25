@@ -14,12 +14,12 @@ class Serializer_TwitterBootstrap_Password
 <div class="%s">
  <label class="control-label" for="%s">%s</label>
  <div class="controls">
-  <input type="password" id="%s" name="%s" value="%s">
+  <input class="input-with-feedback" type="password" id="%s" name="%s" value="%s">
   %s
  </div>
 </div>
 EOS
-            , is_null($input->error) ? 'control-group' : 'control-group error'
+            , is_null($input->error) ? 'control-group' : 'control-group has-error'
             , Serializer_TwitterBootstrap::entitize($input->name)
             , $input->getLabel()
             , Serializer_TwitterBootstrap::entitize($input->name)
