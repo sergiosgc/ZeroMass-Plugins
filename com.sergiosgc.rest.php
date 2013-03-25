@@ -119,7 +119,7 @@ class Rest {
 
         return true;
     }/*}}}*/
-    public function create($entity) {/*{{{*/
+    public function create($entity, $fields = null) {/*{{{*/
         parse_str(file_get_contents("php://input"), $_REQUEST);
         $result = new RestNoData();
         /*#
@@ -137,6 +137,7 @@ class Rest {
 
         $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        if (is_null($fields)) $fields = $_REQUEST;
         /*#
          * The plugin is answering a REST create (PUT) request. Allow the list of fields to insert to be filtered
          *
@@ -144,7 +145,7 @@ class Rest {
          * @param string Entity being processed
          * @param return Associative array of fields to be inserted
          */
-        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.fields', $_REQUEST, $entity );
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create.fields', $fields, $entity );
         $db->insert($table, $fields);
         $result = true;
 
@@ -158,7 +159,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.create', $result, $entity);
         return $result;
     }/*}}}*/
-    public function read($entity) {/*{{{*/
+    public function read($entity, $fields = null) {/*{{{*/
         $result = new RestNoData();
         /*#
          * The plugin is about to answer a REST read (GET) request. Allow it to be short-circuited
@@ -175,6 +176,7 @@ class Rest {
 
         $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        if (is_null($fields)) $fields = $_GET;
         /*#
          * The plugin is answering a REST read (GET) request. Allow the fields for creating the WHERE clause to be filtered
          *
@@ -182,7 +184,7 @@ class Rest {
          * @param string Entity being processed
          * @return array fields
          */
-        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.where.fields', $_GET, $entity);
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read.where.fields', $fields, $entity);
         /*#
          * The plugin is answering a REST read (GET) request. Allow the SQL WHERE clause to be filtered
          *
@@ -211,7 +213,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.read', $result, $entity);
         return $result;
     }/*}}}*/
-    public function update($entity) {/*{{{*/
+    public function update($entity, $queryFields = null, $updateFields = null) {/*{{{*/
         $result = new RestNoData();
         /*#
          * The plugin is about to answer a REST update (POST or PATCH) request. Allow it to be short-circuited
@@ -228,6 +230,7 @@ class Rest {
 
         $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        $fields = is_null($queryFields) ? $_GET : $queryFields;
         /*#
          * The plugin is answering a REST update (POST or PATCH) request. Allow the fields for creating the WHERE clause to be filtered
          *
@@ -235,7 +238,7 @@ class Rest {
          * @param string Entity being processed
          * @return array fields
          */
-        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.where.fields', $_GET, $entity);
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.where.fields', $fields, $entity);
         /*#
          * The plugin is answering a REST update (POST or PATCH) request. Allow the SQL WHERE clause to be filtered
          *
@@ -252,8 +255,12 @@ class Rest {
         $args = $where[1];
         $where = $where[0];
 
-        $toUpdateArray = array();
-        parse_str(file_get_contents("php://input"), $toUpdateArray);
+        if (is_null($updateFields)) {
+            $toUpdateArray = array();
+            parse_str(file_get_contents("php://input"), $toUpdateArray);
+        } else {
+            $toUpdateArray = $updateFields;
+        }
         /*#
          * The plugin is answering a REST update (POST or PATCH) request. Allow the list of fields to update to be filtered
          *
@@ -300,7 +307,7 @@ class Rest {
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update', $result, $entity);
         return $result;
     }/*}}}*/
-    public function delete($entity) {/*{{{*/
+    public function delete($entity, $fields = null) {/*{{{*/
         $result = new RestNoData();
         /*#
          * The plugin is about to answer a REST delete (DELETE) request. Allow it to be short-circuited
@@ -317,6 +324,7 @@ class Rest {
 
         $table = $this->entityTableMap[$entity];
         $db = \com\sergiosgc\Facility::get('db');
+        if (is_null($fields)) $fields = $_GET;
         /*#
          * The plugin is answering a REST delete (DELETE) request. Allow the fields for creating the WHERE clause to be filtered
          *
@@ -324,7 +332,7 @@ class Rest {
          * @param string Entity being processed
          * @return array fields
          */
-        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.where.fields', $_GET, $entity);
+        $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.delete.where.fields', $fields, $entity);
         /*#
          * The plugin is answering a REST delete (DELETE) request. Allow the SQL WHERE clause to be filtered
          *
