@@ -373,6 +373,30 @@ class Rest {
         if (!in_array($entity, $this->urlEntityMap)) throw new RestException('Unknown entity: ' . $entity);
         foreach($this->urlEntityMap as $url => $candidate) if ($candidate == $entity) return $url;
     }/*}}}*/
+    // public function registerFieldMangler($entity, $field, $callback, $mangleOnRead = false, $callOnMissingfield = false) /*{{{*/
+    /**
+     * Helper class to register a callback that changes a field on REST update and on REST create
+     *
+     * The callback signature is someFunction($field, $entity). It should return the (un)changed field.
+     * The callback may return an instance of \com\sergiosgc\RestNoData to have the field removed from 
+     * the request.
+     *
+     * If mangleOnRead is set to true, fields use for querying read operations are also filtered. This
+     * is useful if the callback normalizes the field. Note that this affects read update and delete 
+     * operations.
+     *
+     * If callOnMissingfield is set to true, when the field is missing on the request, the callback
+     * is called with an instance of \com\sergiosgc\RestNoData as a placeholder for the field. 
+     *
+     * @param string Entity
+     * @param mixed Field
+     * @param callable Callback 
+     * @param boolean True if the callback should be called even when the field is missing in the request (optional, defaults to false)
+     * @return mixed The field value
+     */
+    public function registerFieldMangler($entity, $field, $callback, $mangleOnRead = false, $callOnMissingfield = false) {
+        new RestFieldMangler($entity, $field, $callback, $mangleOnRead, $callOnMissingfield);
+    }/*}}}*/
 }
 class RestNoData { }
 
@@ -380,6 +404,43 @@ class RestException extends \Exception { }
 class KeyNotFoundException extends RestException { }
 
 Rest::getInstance();
+
+class RestFieldMangler {
+    protected $entity;
+    protected $field;
+    protected $callback;
+    protected $callOnMissingfield;
+    public function __construct($entity, $field, $callback, $mangleOnRead = false, $callOnMissingfield = false) {/*{{{*/
+        if (!is_callable($callback)) throw new \ZeroMassException('Non-callable passed as $callback argument');
+        $this->entity = $entity;
+        $this->field = $field;
+        $this->callback = $callback;
+        $this->callOnMissingfield = $callOnMissingfield;
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.fields', array($this, 'mangleField'));
+        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.create.fields', array($this, 'mangleField'));
+        if ($mangleOnRead) {
+            \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.read.where.fields', array($this, 'mangleField'));
+            \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.where.fields', array($this, 'mangleField'));
+            \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.delete.where.fields', array($this, 'mangleField'));
+        }
+    }/*}}}*/
+    public function mangleField($fields, $entity) {/*{{{*/
+        if ($entity != $this->entity) return $fields;
+        if (isset($fields[$this->field])) {
+            $fields[$this->field] = call_user_func($this->callback, $fields[$this->field], $entity);
+            if (is_object($fields[$this->field]) && get_class( $fields[$this->field] ) == 'com\sergiosgc\RestNoData') unset($fields[$this->field]);
+            return $fields;
+        }
+        if (!$this->callOnMissingfield) return $fields;
+        $newVal = new RestNoData();
+        $newVal = call_user_func($this->callback, $newVal, $entity);
+        if (is_object($newVal) && get_class($newVal) != 'com\sergiosgc\RestNoData') {
+            $fields[$this->field] = $newVal;
+        }
+        return $fields;
+    }/*}}}*/
+}
+
 
 /*#
  * REST request handler
