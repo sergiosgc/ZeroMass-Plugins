@@ -6,14 +6,13 @@ use com\sergiosgc\form;
 class User {
     protected static $singleton = null;
     protected $url = array(
-        'login' => '/login/', 
-        'loginaction' => '/actions/login/', 
+        'login' => '/login/',
+        'logout' => '/logout/',
         'afterlogin' => '/',
-        'logoutaction' => '/logout/',
         'afterlogout' => '/',
-        'new' => '/signup/',
-        'afternew' => '/'
     );
+    protected $entity = 'user';
+    protected $redirectParam = 'redirectTo';
     /**
      * Singleton pattern instance getter
      * @return Config The singleton Config
@@ -27,24 +26,9 @@ class User {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.replaced_config', array($this, 'config'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.facility.available_REST', array($this, 'registerRestEntities'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.user.signup.validate', array($this, 'validateUniqueUsernameConstraint'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.create.fields', array($this, 'hashPasswordOnCreateUpdate'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update.fields', array($this, 'hashPasswordOnCreateUpdate'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.user.login.validate', array($this, 'validateLogin'));
     }/*}}}*/
-    /**
-     * Plugin initializer responder to com.sergiosgc.zeromass.pluginInit hook
-     */
     public function init() {/*{{{*/
-        \com\sergiosgc\form\Form::registerAutoloader();
-        \com\sergiosgc\Facility::register('user', $this);
-    }/*}}}*/
-    public function config() {/*{{{*/
-        foreach ($this->url as $key => $value) {
-            $this->url[$key] = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.user.url.' . $key, false, $value);
-        }
-        
         /*#
          * Filter the URLs handled by this plugin.
          *
@@ -61,22 +45,44 @@ class User {
          * @return array All plugin URLs
          */
         $this->url = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.url', $this->url);
+        /*#
+         * Filter the entity where users will be found
+         *
+         * @param string REST entity
+         * @return string REST entity
+         */
+        $this->entity = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.entity', $this->entity);
+        /*#
+         * Filter the name of the parameter where the redirect URI for login/logout will be found
+         *
+         * When redirecting after a successful login, the user will be redirected. By default, redirection
+         * occurs to the 'afterlogin' and 'afterlogout' URLs, configurable via config and hook mechanisms. 
+         * However, if a parameter named 'redirectTo' is present, it is used as destination URI for the 
+         * redirect. The name of this parameter can be changed wity this hook.
+         *
+         * @param string REST entity
+         * @return string REST entity
+         */
+        $this->redirectParam = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.redirectParam', $this->redirectParam);
     }/*}}}*/
-    public function registerRestEntities() {/*{{{*/
-        \com\sergiosgc\Rest::getInstance()->registerEntity('user', 'user');
+    public function config() {/*{{{*/
+        foreach ($this->url as $key => $value) {
+            $this->url[$key] = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.user.url.' . $key, false, $value);
+        }
+        $this->entity = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.user.entity', false, $this->entity);
+        $this->redirectParam = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.user.redirectParam', false, $this->redirectParam);
+
+        $this->init();
     }/*}}}*/
     public function handleRequest($handled) {/*{{{*/
         if ($handled) return $handled;
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'GET':
                 switch (preg_replace('_\?.*$_', '', $_SERVER['REQUEST_URI'])) {
-                case $this->url['new']:
-                    $this->signupForm();
-                    return true;
                 case $this->url['login']:
                     $this->loginForm();
                     return true;
-                case $this->url['logoutaction']:
+                case $this->url['logout']:
                     $this->logout();
                     return true;
 
@@ -84,13 +90,10 @@ class User {
             }
             case 'POST':
                 switch (preg_replace('_\?.*$_', '', $_SERVER['REQUEST_URI'])) {
-                case $this->url['new']:
-                    $this->signup();
-                    return true;
                 case $this->url['login']:
                     $this->login();
                     return true;
-                case $this->url['logoutaction']:
+                case $this->url['logout']:
                     $this->logout();
                     return true;
                 default: return $handled;
@@ -99,131 +102,17 @@ class User {
                 return $handled;
         }
     }/*}}}*/
-    public function generateSignupForm() {/*{{{*/
-        $form = new form\Form($this->url['new'], 'Login', '');
-        $form->addMember($input = new form\Input_Text('username'));
-        $input->setLabel('Username');
-        $input->setHelp('Your unique user identifier');
-        $input->addRestriction(new form\Restriction_Mandatory());
-        if (isset($_REQUEST['username'])) $input->setValue($_REQUEST['username']);
-        $form->addMember($input = new form\Input_Password('password'));
-        if (isset($_REQUEST['password'])) $input->setValue($_REQUEST['password']);
-        $input->setLabel('Password');
-        $input->setHelp('A secret password, easily memorizable, difficult to guess');
-        $input->addRestriction(new form\Restriction_Mandatory());
-        $form->addMember($input = new form\Input_Button('create'));
-        $input->setLabel('Create user');
-
-        /*#
-         * The plugin has just created a form for user signup. Allow it to be mangled
-         *
-         * @param \com\sergiosgc\form\Form The signup form
-         * @return \com\sergiosgc\form\Form The signup form
-         */
-        $form = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.form', $form);
-        return $form;
+    public function getLoggedIn() {/*{{{*/
+        return \com\sergiosgc\Facility::get('session')->get('user', true);
     }/*}}}*/
-    public function signupForm($form = null) {/*{{{*/
-        if (is_null($form)) $form = $this->generateSignupForm();
-        $serializer = new \com\sergiosgc\form\Serializer_TwitterBootstrap();
-        $serializer->setLayout('horizontal');
-
-        /*#
-         * The plugin is about to serialize the signup form. Allow the serializer to be mangled
-         *
-         * @param \com\sergiosgc\form\Form_Serializer The form serializer
-         * @return \com\sergiosgc\form\Form_Serializer The form serializer
-         */
-        $serializer = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.form_serializer', $serializer);
-        \ZeroMass::getInstance()->do_callback('com.sergiosgc.contentType', 'text/html');
-        $serialized = $serializer->serialize($form);
-        /*#
-         * The plugin is about to output the signup form. Allow the html to be mangled
-         *
-         * @param string The form
-         * @return string The form
-         */
-        echo \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.form_html', $serialized);
+    public function isLoggedIn() {/*{{{*/
+        $user = \com\sergiosgc\Facility::get('session')->get('user', false, false);
+        if ($user === false) return false;
+        return true;
     }/*}}}*/
-    public function signup() {/*{{{*/
-        $form = $this->generateSignupForm();
-        $validation = $form->validate();
-        /*#
-         * The plugin is validating the signup form. Allow validation to be mangled.
-         *
-         * @param bool|array Validation result as returned by \com\sergiosgc\form\Form::validate()
-         * @param \com\sergiosgc\form\Form The signup form
-         * @return bool|array Validation result as returned by \com\sergiosgc\form\Form::validate()
-         */
-        $validation = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.validate', $validation, $form);
-        if ($validation === true) {
-            $result = \com\sergiosgc\Rest::getInstance()->create('user');
-            /*#
-             * An user has just been created from an UI action.
-             *
-             * @param string Username
-             */
-            \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.created', $_REQUEST['username']);
-            $redirect = $this->url['afternew'];
-            /*#
-             * User signup is ending and will HTTP redirect. Allow the location to be mangled
-             *
-             * @param string URL to redirect to
-             * @param string Username
-             * @return string URL to redirect to
-             */
-            $redirect = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.signup.redirect', $redirect, $_REQUEST['username']);
-            header('Location: ' . $redirect);
-            exit;
-        } else {
-            $this->signupForm($form);
-        }
-    }/*}}}*/
-    public function hashPassword($password) {/*{{{*/
-        $salt = '$2y$' . 'gutUvEvdafcodNisikfij7'; // Fallback salt
-        $salt = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.user.hashsalt', false, $salt); // Try to get salt from config
-        /*#
-         * A password hash is being generated. Allow the salt to be defined
-         * 
-         * @param string Salt. Check documentation for PHP crypt()
-         * @return string Salt. Check documentation for PHP crypt()
-         */
-        $salt = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.hashsalt', $salt); 
-        $hashed = crypt($password, $salt);
-        /*#
-         * A password hash is being generated. Allow the hash to be short-circuited
-         * 
-         * @param string Hashed password
-         * @param string Unhashed password
-         * @return string Hashed password
-         */
-        $hashed = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.passwordhash', $hashed, $password); 
-        return $hashed;
-    }/*}}}*/
-    public function validateUniqueUsernameConstraint($validation, $form) {/*{{{*/
-        $username = $form->getInput('username')->getValue();
-        $count = \com\sergiosgc\Facility::get('db')->fetchValue(<<<EOS
-SELECT 
- count(*)
-FROM 
- "user"
-WHERE
- username = ?
-EOS
-        , $username);
-        if ($count == 0) return $validation;
-
-        $toAppend = array('username' => 'Username already registered');
-        $form->appendInputErrors($toAppend);
-        if ($validation === true) $validation = array();
-        $validation = array_merge($validation, $toAppend);
-        return $validation;
-    }/*}}}*/
-    public function hashPasswordOnCreateUpdate($fields, $entity) {/*{{{*/
-        if ($entity != 'user') return $fields;
-        if (!isset($fields['password'])) return $fields;
-        $fields['password'] = $this->hashPassword($fields['password']);
-        return $fields;
+    public function getUrl($which) {/*{{{*/
+        if (!isset($this->url[$which])) throw new \Exception('Unknown URL: ' . $which);
+        return $this->url[$which];
     }/*}}}*/
     public function generateLoginForm() {/*{{{*/
         $form = new form\Form($this->url['login'], 'Login', '');
@@ -268,6 +157,27 @@ EOS
          * @return string The form
          */
         echo \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.login.form_html', $serialized);
+    }/*}}}*/
+    public function hashPassword($password) {/*{{{*/
+        $salt = '$2y$' . 'gutUvEvdafcodNisikfij7'; // Fallback salt
+        $salt = \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.user.hashsalt', false, $salt); // Try to get salt from config
+        /*#
+         * A password hash is being generated. Allow the salt to be defined
+         * 
+         * @param string Salt. Check documentation for PHP crypt()
+         * @return string Salt. Check documentation for PHP crypt()
+         */
+        $salt = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.hashsalt', $salt); 
+        $hashed = crypt($password, $salt);
+        /*#
+         * A password hash is being generated. Allow the hash to be short-circuited
+         * 
+         * @param string Hashed password
+         * @param string Unhashed password
+         * @return string Hashed password
+         */
+        $hashed = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.passwordhash', $hashed, $password); 
+        return $hashed;
     }/*}}}*/
     public function login() {/*{{{*/
         $form = $this->generateLoginForm();
@@ -355,21 +265,9 @@ EOS
         header('Location: ' . $redirect);
         exit;
     }/*}}}*/
-    public function getLoggedIn() {/*{{{*/
-        return \com\sergiosgc\Facility::get('session')->get('user', true);
-    }/*}}}*/
-    public function isLoggedIn() {/*{{{*/
-        $user = \com\sergiosgc\Facility::get('session')->get('user', false, false);
-        if ($user === false) return false;
-        return true;
-    }/*}}}*/
-    public function getUrl($which) {/*{{{*/
-        return $this->url[$which];
-    }/*}}}*/
 }
 
 User::getInstance();
-
 /*#
  * User authentication 
  *
