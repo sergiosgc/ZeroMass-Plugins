@@ -273,6 +273,12 @@ class Rest {
          * @param return Associative array of fields to be updated
          */
         $toUpdateArray = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update.fields', $toUpdateArray, $entity );
+        if (count($toUpdateArray) == 0) {
+            $result = 0;
+            $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.update', $result, $entity);
+            return $result;
+        }
+
         $setClause = '';
         $separator = ' SET ';
         foreach ($toUpdateArray as $key => $value) {
