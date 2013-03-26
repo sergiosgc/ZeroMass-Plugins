@@ -14,6 +14,17 @@ class MemberSet extends Member implements \RecursiveIterator
     /* }}} */
     /* members field {{{ */
     public $members = array();
+    public function replaceMember(Member $toReplace, Member $with) {
+        for ($i=0; $i<count($this->members); $i++) if ($this->members[$i] == $toReplace) {
+            $old = $this->members[$i];
+            $this->members[$i] = $with;
+            $this->members[$i]->setHelp($old->getHelp());
+            $this->members[$i]->setError($old->getError());
+            $this->members[$i]->setValue($old->getValue());
+            $this->members[$i]->setEnabled($old->getEnabled());
+            return;
+        }
+    }
     public function addMember(Member $val, $before = null)
     {
         if (is_null($before)) {

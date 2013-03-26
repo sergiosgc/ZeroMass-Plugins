@@ -109,6 +109,12 @@ class Form implements \IteratorAggregate
     }
     /* }}} */
     /* members field delegation {{{ */
+    public function replaceMember($toReplace, Member $with)
+    {
+        if (is_string($toReplace)) $toReplace = $this->getInput($toReplace);
+        if (is_int($toReplace)) $toReplace = $this->getMember($toReplace);
+        $this->topMemberSet->replaceMember($toReplace, $with);
+    }
     public function addMember(Member $val, $before = null)
     {
         $this->topMemberSet->addMember($val, $before);
