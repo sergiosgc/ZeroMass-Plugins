@@ -68,8 +68,10 @@ class Table {
             $headers = array_values(func_get_args());
             $row = array_values($this->rows);
             if (count($row) == 0) return;
+            if (count($row[0]) != count($headers)) throw new \Exception(sprintf('Header count (%d) and column count (%d) are different', count($headers), count($row[0])));
             $row = $row[0];
             $this->headers = array();
+
             foreach (array_keys($row) as $i => $field) {
                 $this->headers[$field] = $headers[$i];
             }
