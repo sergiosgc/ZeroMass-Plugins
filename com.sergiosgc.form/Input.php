@@ -47,6 +47,17 @@ abstract class Input extends Member
         $this->value = $val;
     }
     /* }}} */
+    /* enabled field {{{ */
+    public $enabled = true;
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+    public function setEnabled($val)
+    {
+        $this->enabled = (bool) $val;
+    }
+    /* }}} */
     /* constructor {{{ */
     public function __construct($name, $value = null)
     {

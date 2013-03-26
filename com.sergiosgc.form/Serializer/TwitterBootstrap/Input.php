@@ -14,7 +14,7 @@ class Serializer_TwitterBootstrap_Input
 <div class="%s">
  <label class="control-label" for="%s">%s</label>
  <div class="controls">
-  <input class="input-with-feedback" type="text" id="%s" name="%s" value="%s">
+  <input class="input-with-feedback" type="text" id="%s" name="%s" value="%s"%s>
   %s
  </div>
 </div>
@@ -25,6 +25,7 @@ EOS
             , Serializer_TwitterBootstrap::entitize($input->name)
             , Serializer_TwitterBootstrap::entitize($input->name)
             , Serializer_TwitterBootstrap::entitize($input->value)
+            , $input->getEnabled() ? '' : ' disabled'
             , Serializer_TwitterBootstrap::helpBlock($input->help, $input->error)
             );
 
