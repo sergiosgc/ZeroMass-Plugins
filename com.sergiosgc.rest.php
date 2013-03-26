@@ -92,16 +92,20 @@ class Rest {
         if (isset($_REQUEST['com_sergiosgc_rest_httpmethod'])) $method = $_REQUEST['com_sergiosgc_rest_httpmethod'];
         switch ($method) {
         case 'PUT':
+            $type = 'create';
             $result = $this->create($requestedEntity);
             break;
         case 'GET':
+            $type = 'read';
             $result = $this->read($requestedEntity);
             break;
         case 'POST':
         case 'PATCH':
+            $type = 'update';
             $result = $this->update($requestedEntity);
             break;
         case 'DELETE':
+            $type = 'delete';
             $result = $this->delete($requestedEntity);
             break;
         default:
@@ -112,10 +116,10 @@ class Rest {
          *
          * @param mixed The result as a PHP native type
          * @param string Entity being processed
+         * @param string Type of request. One of create,read,update,delete
          * @return mixed The result as a PHP native type
          */
-        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.requestDone.raw', $result, $requestedEntity);
-        $result = json_encode($result);
+        $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.requestDone.raw', $result, $requestedEntity, $type);
 
         return true;
     }/*}}}*/
