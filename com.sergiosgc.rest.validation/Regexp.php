@@ -8,7 +8,7 @@ class Regexp implements FieldValidator {
         $this->regexp = $regexp;
         $this->message = $message;
     }
-    public function validate($value, $field, $entity) {
+    public function validate($value, $field, $entity, $fields) {
         if (preg_match($this->regexp, $value) === 0) throw new RegexpValidationException($field, $this->message);
     }
 }

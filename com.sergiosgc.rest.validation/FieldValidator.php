@@ -9,5 +9,5 @@ interface FieldValidator {
      * This function validates the field. It should throw a
      * FieldValidationException if the field does not pass validation
      */
-    public function validate($value, $field, $entity);
+    public function validate($value, $field, $entity, $fields);
 }

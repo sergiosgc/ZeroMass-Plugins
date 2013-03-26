@@ -8,7 +8,7 @@ class Length implements FieldValidator {
         $this->max = $max;
         $this->message = $message;
     }
-    public function validate($value, $field, $entity) {
+    public function validate($value, $field, $entity, $fields) {
         if (!is_null($this->min) && strlen($value) < $this->min) throw new LengthValidationException($field, $this->message);
         if (!is_null($this->max) && strlen($value) > $this->max) throw new LengthValidationException($field, $this->message);
     }

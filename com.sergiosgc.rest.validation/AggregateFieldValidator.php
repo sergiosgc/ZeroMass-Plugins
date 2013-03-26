@@ -8,7 +8,7 @@ class AggregateFieldValidator implements EntityValidator {
         $result = null;
         foreach ($fields as $field => $value) if (isset($this->validators[$field])) foreach($this->validators[$field] as $validator) {
             try {
-                $validator->validate($value, $field, $entity);
+                $validator->validate($value, $field, $entity, $fields);
             } catch (FieldValidationException $e) {
                 if (is_null($result)) $result = new EntityValidationException($entity);
                 $result->addValidationException($e);
