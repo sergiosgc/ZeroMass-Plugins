@@ -7,7 +7,6 @@ class Html {
     protected static $singleton = null;
     protected $newUrlEntityMap = array();
     protected $editUrlEntityMap = array();
-    protected $lastObservedRestOperation = null;
     /**
      * Singleton pattern instance getter
      * @return Config The singleton Config
@@ -19,10 +18,6 @@ class Html {
     protected function __construct() {/*{{{*/
         \com\sergiosgc\form\Form::registerAutoloader();
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.requestDone.raw', array($this, 'outputResult'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.create', array($this, 'storeCreateResult'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.read', array($this, 'storeReadResult'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.update', array($this, 'storeUpdateResult'));
-        \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.delete', array($this, 'storeDeleteResult'));
 
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.rest.registerEntity', array($this, 'handleRegisterEntity'));
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.zeromass.answerPage', array($this, 'handleRequest'));
@@ -292,24 +287,8 @@ class Html {
          */
         \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.update.postoutput', $entity);
     }/*}}}*/
-    public function storeCreateResult($result, $entity) {/*{{{*/
-        $this->lastObservedRestOperation = 'create';
-        return $result;
-    }/*}}}*/
-    public function storeReadResult($result, $entity) {/*{{{*/
-        $this->lastObservedRestOperation = 'read';
-        return $result;
-    }/*}}}*/
-    public function storeUpdateResult($result, $entity) {/*{{{*/
-        $this->lastObservedRestOperation = 'update';
-        return $result;
-    }/*}}}*/
-    public function storeDeleteResult($result, $entity) {/*{{{*/
-        $this->lastObservedRestOperation = 'delete';
-        return $result;
-    }/*}}}*/
-    public function outputResult($result, $entity) {/*{{{*/
-        switch ($this->lastObservedRestOperation) {
+    public function outputResult($result, $entity, $type) {/*{{{*/
+        switch ($type) {
             case 'create': return $this->redirectAfterCreate($result, $entity);
             case 'read': return $this->read($result, $entity);
             case 'update': return $this->redirectAfterUpdate($result, $entity);
@@ -398,7 +377,7 @@ class Html {
         return $rows;
     }/*}}}*/
     public function redirectAfterUpdate($result, $entity) {/*{{{*/
-        if ($result) { // Create was successful
+        if (is_int($result)) { // Update was successful
             $url = \com\sergiosgc\Rest::getInstance()->getUrlFromEntity($entity);
             /*#
              * The plugin is redirecting the user after a successful update. Allow the destination to be filtered
