@@ -19,6 +19,7 @@ class Table {
     public $classes = array();
     public $links = array();
     public $rowActions = array();
+    public $invisibleColumns = array();
     public function addRow($row) {/*{{{*/
         if (!is_array($row)) throw new \ZeroMassException('row parameter must be an array');
         if ($this->isHash($row)) {
@@ -46,6 +47,10 @@ class Table {
                 $this->rows[] = $row;
             }
         }
+    }/*}}}*/
+    public function setVisible($column, $to = true) {/*{{{*/
+        if ($to) unset($this->invisibleColumns[$column]);
+        if (!$to) $this->invisibleColumns[$column] = true;
     }/*}}}*/
     public function isHash($array) {/*{{{*/
         foreach(array_keys($array) as $key) if ($key != ((int) $key)) return true;
@@ -107,7 +112,7 @@ class Table {
  <thead>
   <tr>
 <?php
-        foreach ($this->getHeaders() as $field => $value) {
+        foreach ($this->getHeaders() as $field => $value) if (!isset($this->invisibleColumns[$field])) {
 ?>
    <th class="field-<?php echo $field ?>"><?php echo $value ?></th>
 <?php
@@ -121,7 +126,7 @@ class Table {
         foreach ($this->rows as $row) {
 ?>
   <tr>
-<?php       foreach ($row as $field => $value) { ?>
+<?php       foreach ($row as $field => $value) if (!isset($this->invisibleColumns[$field])) { ?>
 <td class="field-<?php echo $field ?>"><?php
 if (isset($this->links[$field])) { 
     $values = array();
