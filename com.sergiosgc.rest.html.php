@@ -315,8 +315,6 @@ class Html {
     }/*}}}*/
     public function read($result, $entity) {/*{{{*/
         if (strpos($_SERVER['HTTP_ACCEPT'], 'text/html') === false) return $result;
-        $rows = $result;
-        $result = new \com\sergiosgc\RestNoData();
         /*#
          * The plugin is about to answer a read request
          *
@@ -325,10 +323,13 @@ class Html {
          *
          * @param mixed The result. 
          * @param string The entity being read
-         * @return mixed The result. An instance of RestNoData causes execution to continue
+         * @return mixed The result. An instance of RestNoData causes execution to continue. A string result will be printed and end request execution
          */
         $result = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.read.pre', $result, $entity);
-        if (get_class($result) != 'com\sergiosgc\RestNoData') {
+        if (is_object($result) && get_class($result) == 'com\sergiosgc\RestNoData') {
+            return;
+        }
+        if (is_string($result)) {
             print $result;
             return;
         }
@@ -374,7 +375,7 @@ class Html {
          * @param string The entity being read
          */
         \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.read.postoutput', $entity);
-        return $rows;
+        return $result;
     }/*}}}*/
     public function redirectAfterUpdate($result, $entity) {/*{{{*/
         if (is_int($result)) { // Update was successful
