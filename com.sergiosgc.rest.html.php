@@ -352,7 +352,10 @@ class Html {
          */
         $fields = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rest.html.read.metadata', $fields, $entity);
         $table = new \com\sergiosgc\ui\Table();
-        foreach($rows as $row) $table->addRow($row);
+        foreach ($fields as $field => $metadata) {
+            if ($metadata['show'] == false) $table->setVisible($field, false);
+        }
+        foreach($result as $row) $table->addRow($row);
         /*#
          * The plugin is producing a table listing an entity (read). Allow the result table to be manipulated
          *
