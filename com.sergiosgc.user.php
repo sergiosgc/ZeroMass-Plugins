@@ -29,6 +29,8 @@ class User {
         \ZeroMass::getInstance()->register_callback('com.sergiosgc.user.login.validate', array($this, 'validateLogin'));
     }/*}}}*/
     public function init() {/*{{{*/
+        if (is_null(\com\sergiosgc\Facility::get('user', false))) \com\sergiosgc\Facility::register('user', $this);
+
         /*#
          * Filter the URLs handled by this plugin.
          *
@@ -191,7 +193,9 @@ class User {
          */
         $validation = \ZeroMass::getInstance()->do_callback('com.sergiosgc.user.login.validate', $validation, $form);
         if ($validation === true) {
-            \com\sergiosgc\Facility::get('session')->set('user', $_REQUEST['username']);
+            $user = \com\sergiosgc\Rest::getInstance()->read('user');
+            
+            \com\sergiosgc\Facility::get('session')->set('user', $user[0]['username']);
             $redirect = $this->url['afterlogin'];
             /*#
              * User login is ending and will HTTP redirect. Allow the location to be mangled
@@ -214,7 +218,7 @@ class User {
             $fields = array_merge($fields, array('username' => $_POST['username']));
             if (isset($fields['password'])) unset($fields['password']);
             return $fields;
-        });
+        }, 5);
         $user = \com\sergiosgc\Rest::getInstance()->read('user');
         if (count($user) == 0) {
             $toAppend = array('username' => 'Username not found or wrong password', 'password' => 'Username not found or wrong password');
