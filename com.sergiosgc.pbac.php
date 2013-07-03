@@ -26,6 +26,15 @@ class Pbac {
     public function has($permission) {/*{{{*/
         if ($permission == '') return true;
 
+        // Handle permission arrays (return true if user has at least one of the permissions)
+        if (is_array($permission)) {
+            $result = false;
+            foreach ($permission as $p) {
+                $result = $result || $this->has($p);
+            }
+            return $result;
+        }
+
         $result = false;
         /*#
          * A permission request has been received. Attempt to grant the permission
