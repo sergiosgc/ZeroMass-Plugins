@@ -30,7 +30,52 @@ class Rbac {
     }/*}}}*/
     protected function getUserRoles($user) {/*{{{*/
         if (!isset($this->userRoles[$user])) {
-            $this->userRoles[$user] = explode(',', \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.rbac.user.' . $user . '.roles', false, ''));
+            $loggedInUser = \com\sergiosgc\Facility::get('user')->getLoggedIn();
+
+            $userRestEntity = 'user';
+            /*#
+             * Rbac is trying to find out a user role list. Allow the entity name for "user" to be filtered
+             *
+             * @param string User entity name
+             * @return string User entity name
+             */
+            $userRestEntity = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rbac.user_entity', $userRestEntity);
+
+            $userUsernameField = 'username';
+            /*#
+             * Rbac is trying to find out a user role list. Allow the username field name to be filtered
+             *
+             * @param string Username field name
+             * @return string Username field name
+             */
+            $userUsernameField = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rbac.username_field', $userUsernameField);
+
+            $userRoleField = 'role';
+            /*#
+             * Rbac is trying to find out a user role list. Allow the role field name to be filtered
+             *
+             * @param string Role field name
+             * @return string Role field name
+             */
+            $userRoleField = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rbac.role_field', $userRoleField);
+
+            $loggedInUser = \com\sergiosgc\Facility::get('REST')->read($userRestEntity, array($userUsernameField => $loggedInUser));
+            /*#
+             * Rbac just read the current logged in user from REST. Allow it to be mangled
+             *
+             * @param array Logged in user fields
+             * @return array Logged in user fields
+             */
+            $loggedInUser = \ZeroMass::getInstance()->do_callback('com.sergiosgc.rbac.logged_in_user', $loggedInUser);
+            if ( count($loggedInUser) != 1 || !isset($loggedInUser[0][$userRoleField])) {
+                $this->userRoles[$user] = explode(',', \com\sergiosgc\Facility::get('config')->get('com.sergiosgc.rbac.user.' . $user . '.roles', false, ''));
+            } else {
+                if (strpos($loggedInUser[0][$userRoleField], ',')) {
+                    $this->userRoles[$user] = explode(',', $loggedInUser[0][$userRoleField]);
+                } else {
+                    $this->userRoles[$user] = array( $loggedInUser[0][$userRoleField] );
+                }
+            }
         }
         return $this->userRoles[$user];
     }/*}}}*/
@@ -45,6 +90,7 @@ class Rbac {
     }/*}}}*/
     public function grantPermission($result, $permission) {/*{{{*/
         if ($result) return $result;
+        if ($permission == '') return true;
         if (!\com\sergiosgc\Facility::get('user')->isLoggedIn()) return $result;
         if ($this->userHasPermission(\com\sergiosgc\Facility::get('user')->getLoggedIn(), $permission)) return true;
         return $result;
