@@ -28,7 +28,7 @@ class Paginator {
 
         return $result;
     }/*}}}*/
-    protected function outputLinkToPage($page) {
+    protected function outputLinkToPage($page) {/*{{{*/
         if (is_null($this->form)) {
             $href = '';
             $separator = '?';
@@ -59,7 +59,7 @@ class Paginator {
             printf(' href="#" onclick="comSergiosgcUiPaginatorGotoPage(%d)', 
                 $page);
         }
-    }
+    }/*}}}*/
     public function output() {/*{{{*/
         $remaining = $this->size - 1;
         if ($remaining % 2 == 0) {
