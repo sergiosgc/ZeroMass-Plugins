@@ -118,7 +118,7 @@ class Cookie {
                 continue;
             }
             $this->setValue($value);
-            @$this->setCookie($name); // Refresh cookie lifetime on browser, error-silenced because it may be too late to send cookies
+            @$this->setCookie($value['name']); // Refresh cookie lifetime on browser, error-silenced because it may be too late to send cookies
         }
     }/*}}}*/
     public function getValue($name) {/*{{{*/
