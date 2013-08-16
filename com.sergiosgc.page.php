@@ -38,8 +38,17 @@ class Page {
          */
         $this->templatePath = \ZeroMass::getInstance()->do_callback('com.sergiosgc.page.templatepath', $this->templatePath);
     }/*}}}*/
-    public function contentTypeHandler($mime) {/*{{{*/
+    public function contentTypeHandler($mime, $encoding = 'utf-8') {/*{{{*/
+        static $headersSent = false;
         if ($mime == 'text/html') $this->primaryOutputIsStarting();
+        if (!$headersSent) {
+            if ($encoding) {
+                header('Content-type: ' . $mime . '; charset=' . $encoding);
+            } else {
+                header('Content-type: ' . $mime);
+            }
+            $headersSent = true;
+        }
         return $mime;
     }/*}}}*/
     public function primaryOutputIsStarting() {/*{{{*/
@@ -56,7 +65,6 @@ class Page {
     }/*}}}*/
     public function output() {/*{{{*/
         ob_end_flush();
-        header('Content-type: text/html; charset=utf-8');
         $this->parseTemplate();
         foreach ($this->template as $part) {
             if ($part['type'] == 'string') {
